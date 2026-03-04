@@ -1,0 +1,17 @@
+# Node & build folders
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+
+# React build
+web/build/
