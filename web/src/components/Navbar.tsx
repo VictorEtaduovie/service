@@ -1,14 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
+
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white sticky-top border-bottom py-3">
@@ -18,26 +23,42 @@ export default function Navbar() {
           href="/"
           className="navbar-brand fw-bolder fs-4 tracking-tighter"
           style={{ color: "var(--color-primary)" }}
+          onClick={closeMenu}
         >
           YourPlatformName
         </Link>
 
+        {/* Mobile Hamburger / X */}
         <button
-          className="navbar-toggler border-0"
+          className={`navbar-toggler custom-navbar-toggler ${
+            isOpen ? "is-open" : ""
+          }`}
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navContent"
+          aria-label={isOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((prev) => !prev)}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
+          <span className="hamburger-line"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="navContent">
+        {/* Navigation */}
+        <div
+          className={`navbar-collapse mobile-nav-menu ${
+            isOpen ? "is-open" : ""
+          }`}
+          id="navContent"
+        >
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0 gap-3">
             <li className="nav-item">
               <Link
                 href="/search"
+                onClick={closeMenu}
                 className={`nav-link fw-medium ${
-                  pathname.startsWith("/search") ? "active text-primary fw-bold" : ""
+                  pathname.startsWith("/search")
+                    ? "active text-primary fw-bold"
+                    : ""
                 }`}
               >
                 Browse Services
@@ -47,6 +68,7 @@ export default function Navbar() {
             <li className="nav-item">
               <Link
                 href="/how-it-works"
+                onClick={closeMenu}
                 className={`nav-link fw-medium ${
                   isActive("/how-it-works") ? "active text-primary fw-bold" : ""
                 }`}
@@ -57,9 +79,12 @@ export default function Navbar() {
 
             <li className="nav-item">
               <Link
-                href="/auth/signup"
+                href="/provider"
+                onClick={closeMenu}
                 className={`nav-link fw-medium ${
-                  pathname.startsWith("/auth/signup") ? "active text-primary fw-bold" : ""
+                  pathname.startsWith("/provider")
+                    ? "active text-primary fw-bold"
+                    : ""
                 }`}
               >
                 Become a Provider
@@ -69,6 +94,7 @@ export default function Navbar() {
             <li className="nav-item">
               <Link
                 href="/pricing"
+                onClick={closeMenu}
                 className={`nav-link fw-medium ${
                   isActive("/pricing") ? "active text-primary fw-bold" : ""
                 }`}
@@ -80,6 +106,7 @@ export default function Navbar() {
             <li className="nav-item">
               <Link
                 href="/help"
+                onClick={closeMenu}
                 className={`nav-link fw-medium ${
                   isActive("/help") ? "active text-primary fw-bold" : ""
                 }`}
@@ -89,9 +116,11 @@ export default function Navbar() {
             </li>
           </ul>
 
-          <div className="d-flex align-items-center gap-3">
+          {/* Auth buttons */}
+          <div className="d-flex align-items-center gap-3 navbar-auth-actions">
             <Link
               href="/auth/login"
+              onClick={closeMenu}
               className={`text-decoration-none fw-bold ${
                 pathname.startsWith("/auth/login")
                   ? "text-primary"
@@ -103,6 +132,7 @@ export default function Navbar() {
 
             <Link
               href="/auth/signup"
+              onClick={closeMenu}
               className="btn btn-primary px-4 py-2 fw-bold shadow-sm"
             >
               Get Started

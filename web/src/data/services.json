@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Plumber",
+    "category": "Home Services",
+    "keywords": ["water leak", "pipe", "toilet", "bathroom", "sink"]
+  },
+  {
+    "id": 2,
+    "name": "Electrician",
+    "category": "Home Services",
+    "keywords": ["light", "socket", "wiring", "electricity"]
+  },
+  {
+    "id": 3,
+    "name": "AC Repair",
+    "category": "Home Services",
+    "keywords": ["air conditioner", "cooling", "ac", "hvac"]
+  },
+  {
+    "id": 4,
+    "name": "Generator Repair",
+    "category": "Home Services",
+    "keywords": ["generator", "power", "electricity"]
+  },
+  {
+    "id": 5,
+    "name": "Hair Stylist",
+    "category": "Beauty",
+    "keywords": ["hair", "salon", "braids", "makeup"]
+  },
+  {
+    "id": 6,
+    "name": "Makeup Artist",
+    "category": "Beauty",
+    "keywords": ["bridal makeup", "beauty", "fashion"]
+  },
+  {
+    "id": 7,
+    "name": "Laptop Repair",
+    "category": "Tech",
+    "keywords": ["computer", "laptop", "screen", "software"]
+  },
+  {
+    "id": 8,
+    "name": "Phone Repair",
+    "category": "Tech",
+    "keywords": ["iphone", "android", "mobile"]
+  }
+]
