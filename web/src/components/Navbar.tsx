@@ -16,7 +16,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white sticky-top border-bottom py-3">
+    <nav className="navbar  navbar-expand-lg navbar-light bg-white sticky-top border-bottom py-3">
       <div className="container">
         {/* Logo */}
         <Link

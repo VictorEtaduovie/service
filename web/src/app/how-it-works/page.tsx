@@ -1,704 +1,534 @@
 "use client";
 
-import React, { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
-import Link from "next/link";
 
-type Step = {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  highlights: string[];
-};
-
-const CLIENT_STEPS: Step[] = [
+const journeySteps = [
   {
-    id: "search",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M21 21l-4.35-4.35"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="11" cy="11" r="6" stroke="#1E3A8A" strokeWidth="1.6" />
-      </svg>
-    ),
-    title: "Search",
+    number: "01",
+    eyebrow: "Discover",
+    title: "Tell us what you need.",
     description:
-      "Type the service you need. Browse categories or describe your problem to get smart suggestions.",
-    highlights: [
-      "Smart search suggestions",
-      "Location-based results",
-      "AI-assisted matching",
-    ],
+      "Search naturally for a service, explore categories, or describe what you need in your own words.",
+    visual: "search",
   },
   {
-    id: "compare",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M3 6h18"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M6 12h12"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 18h6"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Compare",
+    number: "02",
+    eyebrow: "Compare",
+    title: "Find the right professional.",
     description:
-      "View verified professionals near you. Compare ratings, reviews, pricing, and availability.",
-    highlights: [
-      "Distance shown in real-time",
-      "Transparent pricing",
-      "Verified badges",
-    ],
+      "Compare nearby providers using ratings, verification, pricing, availability and distance.",
+    visual: "compare",
   },
   {
-    id: "book",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M3 7v10a2 2 0 0 0 2 2h12"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M21 7v10a2 2 0 0 1-2 2H7"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M8 3h8v4H8z"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Book",
+    number: "03",
+    eyebrow: "Book",
+    title: "Choose when it happens.",
     description:
-      "Choose your provider and confirm your booking. Secure payments and instant confirmation.",
-    highlights: [
-      "OTP-secured account creation",
-      "Safe checkout",
-      "Instant booking confirmation",
-    ],
+      "Book instantly or schedule a service for later. Add notes, photos and the details your provider needs.",
+    visual: "book",
   },
   {
-    id: "track",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M12 6v6l4 2"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx="12" cy="12" r="9" stroke="#1E3A8A" strokeWidth="1.6" />
-      </svg>
-    ),
-    title: "Track & Review",
+    number: "04",
+    eyebrow: "Track",
+    title: "Know where your provider is.",
     description:
-      "Track your provider on the map in real time. Chat directly. After completion, rate your experience.",
-    highlights: ["Live map tracking", "In-app messaging", "Ratings & reviews"],
+      "For eligible in-person jobs, follow your provider on the map and see their arrival status in real time.",
+    visual: "track",
+  },
+  {
+    number: "05",
+    eyebrow: "Complete",
+    title: "Finish with confidence.",
+    description:
+      "Confirm completion, review the experience and keep your service history in one place.",
+    visual: "complete",
   },
 ];
 
-const PROVIDER_STEPS: Step[] = [
-  {
-    id: "signup",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M12 2v6"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M6 10h12"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M7 20h10"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Sign Up",
-    description:
-      "Create your account, select your services, upload documents, and verify your identity.",
-    highlights: [
-      "Service selection",
-      "ID & certification upload",
-      "Approval process",
-    ],
-  },
-  {
-    id: "online",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M3 12h18"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M8 6v12"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Become Available",
-    description:
-      "Turn on availability and receive job requests from nearby clients.",
-    highlights: [
-      "Set availability",
-      "Define service area radius",
-      "Manage pricing",
-    ],
-  },
-  {
-    id: "accept",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M5 12h14"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M9 6l6 6-6 6"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Accept Jobs",
-    description:
-      "Review incoming requests, accept jobs, and navigate to the client using real-time maps.",
-    highlights: [
-      "Distance visibility",
-      "Estimated earnings preview",
-      "Live route tracking",
-    ],
-  },
-  {
-    id: "complete",
-    icon: (
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M20 6L9 17l-5-5"
-          stroke="#1E3A8A"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-    title: "Finish & Earn",
-    description:
-      "Mark the job as completed and receive payment securely to your wallet.",
-    highlights: ["Secure payments", "Earnings dashboard"],
-  },
+const providerSteps = [
+  "Create your professional profile",
+  "Add your services and specializations",
+  "Complete verification",
+  "Set your availability and service area",
+  "Receive and manage bookings",
 ];
 
 export default function HowItWorksPage() {
-  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
+  const [providerActive, setProviderActive] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
-  function toggleFaq(id: string) {
-    setOpenFaq((cur) => (cur === id ? null : id));
-  }
+  useEffect(() => {
+    setIsVisible(true);
+
+    const interval = window.setInterval(() => {
+      setActiveStep((current) => (current + 1) % journeySteps.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
-    <div className="how-page bg-white text-dark">
+    <div className="how-it-works-page">
       <Navbar />
 
-      {/* HERO */}
-      <header className="how-hero">
-        <div className="how-hero__inner container-wide">
-          <div className="how-hero__copy">
-            <h1 className="how-hero__title">How It Works</h1>
-            <p className="how-hero__subtitle">
-              Book trusted professionals in minutes — simple, secure, and
-              transparent.
-            </p>
+      <main className="how-it-works-page__main">
+        {/* ===================================================== */}
+        {/* HERO */}
+        {/* ===================================================== */}
 
-            <div className="how-hero__ctas">
-              <Link href="/search" className="btn btn-primary btn-lg me-3">
-                Find a Service
-              </Link>
-              <Link
-                href="/provider/onboarding"
-                className="btn btn-outline-primary btn-lg"
-              >
-                Become a Provider
-              </Link>
-            </div>
-          </div>
+        <section className="how-it-works-page__hero">
+          <div className="how-it-works-page__hero-grid" />
 
-          <div className="how-hero__visual how-hero__inner_example" aria-hidden>
-            <div className="how-hero__card card-elevated">
-              <div className="how-hero__example">
-                <div className="example-step">
-                  <div className="example-step__icon">🔎</div>
-                  <div>
-                    <div className="fw-bold">Search</div>
-                    <div className="text-muted small">
-                      Plumber • AC Repair • Electrician
-                    </div>
-                  </div>
-                </div>
+          <div className="how-it-works-page__hero-orb how-it-works-page__hero-orb--one" />
+          <div className="how-it-works-page__hero-orb how-it-works-page__hero-orb--two" />
 
-                <div className="example-result mt-3">
-                  <div className="example-result__row">
-                    <div className="example-thumb" />
-                    <div className="example-meta">
-                      <div className="fw-semibold">John Doe — Electrician</div>
-                      <div className="small text-muted">
-                        4.9 • 2.4km • From ₦3,500
-                      </div>
-                    </div>
-                    <div className="ms-auto">
-                      <button className="btn btn-sm btn-primary">Book</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+          <div className="how-it-works-page__container">
+            <div
+              className={`how-it-works-page__hero-content ${
+                isVisible ? "how-it-works-page__hero-content--visible" : ""
+              }`}
+            >
+              <span className="how-it-works-page__eyebrow">How it works</span>
 
-      {/* MAIN */}
-      <main className="container section-pad" id="how-it-works-main">
-        {/* A — Clients */}
-        <section
-          aria-labelledby="clients-title"
-          className="mb-5 how-clients__section"
-        >
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <h2 id="clients-title" className="other_section_title">
-              How It Works for Clients
-            </h2>
-            <div className="text-muted small">4 easy steps to get help</div>
-          </div>
+              <h1 className="how-it-works-page__hero-title">
+                From “I need help”
+                <span>to “it’s handled.”</span>
+              </h1>
 
-          <div className="row g-4 how-clients__steps">
-            {CLIENT_STEPS.map((step) => (
-              <div key={step.id} className="col-12 col-md-6 col-lg-3">
-                <article
-                  className="card-elevated p-4 h-100 step-card how-clients__step"
-                  aria-labelledby={`step-${step.id}-title`}
+              <p className="how-it-works-page__hero-description">
+                Discover trusted local professionals, compare your options, book
+                with confidence and stay connected from start to finish.
+              </p>
+
+              <div className="how-it-works-page__hero-actions">
+                <Link
+                  href="/search"
+                  className="how-it-works-page__primary-button"
                 >
-                  <div className="step-card__icon" aria-hidden>
-                    <div className="icon-circle">{step.icon}</div>
-                  </div>
+                  Find a Service
+                </Link>
 
-                  <h3 id={`step-${step.id}-title`} className="h5 mt-3 mb-2">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted small mb-3">{step.description}</p>
-
-                  <ul className="list-unstyled d-flex flex-column gap-2 mt-auto">
-                    {step.highlights.map((h) => (
-                      <li
-                        key={h}
-                        className="badge bg-light border text-muted p-2 how-clients__highlight"
-                        style={{ borderRadius: 10 }}
-                      >
-                        {h}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
+                <a href="#journey" className="how-it-works-page__hero-link">
+                  See how it works
+                  <span>↓</span>
+                </a>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* B — Providers */}
-        <section
-          aria-labelledby="providers-title"
-          className="mt-5 how-providers__section"
-        >
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <h2 id="providers-title" className="other_section_title">
-              How It Works for Providers
-            </h2>
-            <div className="text-muted small">4 steps to start earning</div>
-          </div>
+              <div className="how-it-works-page__hero-trust">
+                <span>
+                  <i />
+                  Verified professionals
+                </span>
 
-          <div className="row g-4 how-providers__steps">
-            {PROVIDER_STEPS.map((step) => (
-              <div key={step.id} className="col-12 col-md-6 col-lg-3">
-                <article
-                  className="card-elevated p-4 h-100 step-card how-providers__step"
-                  aria-labelledby={`provider-step-${step.id}-title`}
-                >
-                  <div className="step-card__icon" aria-hidden>
-                    <div className="icon-circle how-providers__icon">
-                      {step.icon}
-                    </div>
-                  </div>
+                <span>
+                  <i />
+                  Secure bookings
+                </span>
 
-                  <h3
-                    id={`provider-step-${step.id}-title`}
-                    className="h5 mt-3 mb-2"
-                  >
-                    {step.title}
-                  </h3>
-                  <p className="text-muted small mb-3">{step.description}</p>
-
-                  <ul className="list-unstyled d-flex flex-column gap-2 mt-auto">
-                    {step.highlights.map((h) => (
-                      <li
-                        key={h}
-                        className="badge bg-light border text-muted p-2 how-providers__highlight"
-                        style={{ borderRadius: 10 }}
-                      >
-                        {h}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
+                <span>
+                  <i />
+                  Real-time tracking
+                </span>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* C — Trust & Safety */}
-        <section
-          aria-labelledby="safety-title"
-          className="mt-5 how-safety__section"
-        >
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <h2 id="safety-title" className="other_section_title">
-              Your Safety Comes First
-            </h2>
-            <div className="text-muted small">
-              Trust & protection across the platform
             </div>
-          </div>
 
-          <div className="row g-4 how-safety__blocks">
-            <div className="col-12 col-md-6 col-lg-3">
-              <div className="card-elevated p-4 how-safety__block">
-                <div className="d-flex gap-3 align-items-start">
-                  <div className="bg-soft rounded p-2">
-                    <svg
-                      width="28"
-                      height="28"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M12 2l3 6 6 .5-4.5 4 1 6-5-3-5 3 1-6L3 8.5 9 8 12 2z"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+            {/* HERO VISUAL */}
+            <div className="how-it-works-page__hero-visual">
+              <div className="how-it-works-page__hero-phone">
+                <div className="how-it-works-page__phone-top">
+                  <span>Nearby professionals</span>
+                  <span>⌖ Lagos</span>
+                </div>
+
+                <div className="how-it-works-page__phone-search">
+                  <span>⌕</span>
+                  <span>AC repair</span>
+                  <span>×</span>
+                </div>
+
+                <div className="how-it-works-page__phone-map">
+                  <div className="how-it-works-page__map-road how-it-works-page__map-road--one" />
+                  <div className="how-it-works-page__map-road how-it-works-page__map-road--two" />
+
+                  <div className="how-it-works-page__map-pin how-it-works-page__map-pin--one">
+                    <span />
                   </div>
-                  <div>
-                    <div className="fw-semibold">
-                      Identity verification for providers
-                    </div>
-                    <div className="small text-muted">
-                      Verified IDs and document checks help keep the platform
-                      safe.
-                    </div>
+
+                  <div className="how-it-works-page__map-pin how-it-works-page__map-pin--two">
+                    <span />
+                  </div>
+
+                  <div className="how-it-works-page__map-pin how-it-works-page__map-pin--three">
+                    <span />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="col-12 col-md-6 col-lg-3">
-              <div className="card-elevated p-4 how-safety__block">
-                <div className="d-flex gap-3 align-items-start">
-                  <div className="bg-soft rounded p-2">
-                    <svg
-                      width="28"
-                      height="28"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M12 3v4"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M5 7h14"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M5 11h14v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
+                <div className="how-it-works-page__phone-provider">
+                  <div className="how-it-works-page__phone-avatar">✓</div>
+
                   <div>
-                    <div className="fw-semibold">Secure payment processing</div>
-                    <div className="small text-muted">
-                      PCI-compliant payment handling and payment holds protect
-                      both parties.
-                    </div>
+                    <strong>Verified AC Specialist</strong>
+                    <span>4.9 ★ · 1.2 km away</span>
                   </div>
+
+                  <span className="how-it-works-page__phone-arrow">→</span>
                 </div>
               </div>
-            </div>
 
-            <div className="col-12 col-md-6 col-lg-3">
-              <div className="card-elevated p-4 how-safety__block">
-                <div className="d-flex gap-3 align-items-start">
-                  <div className="bg-soft rounded p-2">
-                    <svg
-                      width="28"
-                      height="28"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M4 7h16"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M4 12h16"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M4 17h16"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="fw-semibold">
-                      Transparent ratings & reviews
-                    </div>
-                    <div className="small text-muted">
-                      Honest reviews and rating history help you choose the
-                      right provider.
-                    </div>
-                  </div>
+              <div className="how-it-works-page__floating-card how-it-works-page__floating-card--top">
+                <span className="how-it-works-page__floating-icon">✓</span>
+
+                <div>
+                  <small>Verified</small>
+                  <strong>Identity confirmed</strong>
                 </div>
               </div>
-            </div>
 
-            <div className="col-12 col-md-6 col-lg-3">
-              <div className="card-elevated p-4 how-safety__block">
-                <div className="d-flex gap-3 align-items-start">
-                  <div className="bg-soft rounded p-2">
-                    <svg
-                      width="28"
-                      height="28"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M21 6l-9 6-9-6"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M21 12l-9 6-9-6"
-                        stroke="#1E3A8A"
-                        strokeWidth="1.4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="fw-semibold">
-                      Dedicated dispute resolution
-                    </div>
-                    <div className="small text-muted">
-                      Our support team investigates and resolves issues fairly
-                      and promptly.
-                    </div>
-                  </div>
+              <div className="how-it-works-page__floating-card how-it-works-page__floating-card--bottom">
+                <span className="how-it-works-page__floating-icon">↗</span>
+
+                <div>
+                  <small>Live</small>
+                  <strong>Provider en route</strong>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* D — FAQ Preview */}
-        <section aria-labelledby="faq-title" className="mt-5 how-faq__section">
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <h2 id="faq-title" className="other_section_title">
-              Frequently Asked Questions
-            </h2>
-            <div className="text-muted small">Top questions from new users</div>
-          </div>
+        {/* ===================================================== */}
+        {/* JOURNEY */}
+        {/* ===================================================== */}
 
-          <div className="row g-4 how-faq__list">
-            {[
-              {
-                id: "faq-verified",
-                q: "How are providers verified?",
-                a: "Providers undergo identity verification and document checks, including ID and certification uploads. We also run background checks for high-risk categories.",
-              },
-              {
-                id: "faq-payment",
-                q: "How does payment work?",
-                a: "Payments are processed securely through our payment gateway. Funds are held until the job is marked complete, then released to the provider.",
-              },
-              {
-                id: "faq-unsatisfied",
-                q: "What if I’m not satisfied with a service?",
-                a: "Open a dispute via the Help Center. Our support team will investigate, mediate, and if necessary issue a refund under our guarantee.",
-              },
-              {
-                id: "faq-provider-pay",
-                q: "How do providers receive payments?",
-                a: "Providers receive payouts to their connected bank account or in-app wallet according to their payout schedule. Earnings are visible in the dashboard.",
-              },
-            ].map((f) => {
-              const open = openFaq === f.id;
-              return (
-                <div key={f.id} className="col-12 col-md-6">
-                  <div className="card-elevated p-3 how-faq__item h-auto">
-                    <button
-                      className="d-flex w-100 align-items-start gap-3 bg-transparent border-0 p-0 text-start"
-                      onClick={() => toggleFaq(f.id)}
-                      aria-expanded={open}
-                      aria-controls={`${f.id}-panel`}
-                    >
-                      <div className="how-faq__icon bg-soft rounded p-2 me-2">
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden
-                        >
-                          <path
-                            d="M12 2a10 10 0 1 0 0 20"
-                            stroke="#1E3A8A"
-                            strokeWidth="1.4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
+        <section id="journey" className="how-it-works-page__journey">
+          <div className="how-it-works-page__container">
+            <div className="how-it-works-page__section-heading">
+              <span className="how-it-works-page__section-kicker">
+                Your journey
+              </span>
 
-                      <div className="flex-grow-1">
-                        <div className="fw-semibold">{f.q}</div>
-                        <div
-                          id={`${f.id}-panel`}
-                          className="text-muted small mt-2"
-                          style={{ display: open ? "block" : "none" }}
-                        >
-                          {f.a}
-                        </div>
-                      </div>
+              <h2 className="how-it-works-page__section-title">
+                Every step designed to feel simple.
+              </h2>
 
-                      <div className="ms-3">
-                        <span className="text-muted">{open ? "−" : "+"}</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 text-center">
-            <Link href="/help" className="btn btn-outline-primary px-4">
-              View Full Help Center
-            </Link>
-          </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section className="mt-5 how-cta__section">
-          <div className="card-elevated p-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 how-cta__inner">
-            <div>
-              <h3 className="mb-1 fw-bold">Ready to Get Started?</h3>
-              <p className="mb-0 text-muted">
-                Find trusted professionals near you or start earning as a
-                provider.
+              <p>
+                We take the complexity out of finding and managing local
+                services.
               </p>
             </div>
 
-            <div className="d-flex gap-3">
-              <Link href="/search" className="btn btn-primary px-4">
-                Find a Service
-              </Link>
-              <Link
-                href="/provider/onboarding"
-                className="btn btn-outline-primary px-4"
-              >
-                Become a Provider
+            <div className="how-it-works-page__journey-layout">
+              <div className="how-it-works-page__journey-navigation">
+                {journeySteps.map((step, index) => (
+                  <button
+                    key={step.number}
+                    type="button"
+                    className={`how-it-works-page__journey-nav ${
+                      activeStep === index
+                        ? "how-it-works-page__journey-nav--active"
+                        : ""
+                    }`}
+                    onClick={() => setActiveStep(index)}
+                  >
+                    <span>{step.number}</span>
+
+                    <div>
+                      <small>{step.eyebrow}</small>
+                      <strong>{step.title}</strong>
+                    </div>
+
+                    <b>→</b>
+                  </button>
+                ))}
+              </div>
+
+              <div className="how-it-works-page__journey-visual">
+                <div className="how-it-works-page__journey-progress">
+                  <span
+                    style={{
+                      width: `${
+                        ((activeStep + 1) / journeySteps.length) * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+
+                <div className="how-it-works-page__journey-stage">
+                  <div
+                    key={journeySteps[activeStep].visual}
+                    className="how-it-works-page__journey-stage-content"
+                  >
+                    <span className="how-it-works-page__journey-number">
+                      {journeySteps[activeStep].number}
+                    </span>
+
+                    <span className="how-it-works-page__journey-eyebrow">
+                      {journeySteps[activeStep].eyebrow}
+                    </span>
+
+                    <h3>{journeySteps[activeStep].title}</h3>
+
+                    <p>{journeySteps[activeStep].description}</p>
+
+                    <div
+                      className={`how-it-works-page__journey-mockup how-it-works-page__journey-mockup--${journeySteps[activeStep].visual}`}
+                    >
+                      {journeySteps[activeStep].visual === "search" && (
+                        <>
+                          <div className="how-it-works-page__mockup-search">
+                            <span>⌕</span>
+                            <span>Find an AC repair specialist</span>
+                          </div>
+
+                          <div className="how-it-works-page__mockup-suggestions">
+                            <span>AC Repair</span>
+                            <span>HVAC Specialist</span>
+                            <span>Air Conditioner Maintenance</span>
+                          </div>
+                        </>
+                      )}
+
+                      {journeySteps[activeStep].visual === "compare" && (
+                        <div className="how-it-works-page__mockup-provider-list">
+                          {[1, 2, 3].map((item) => (
+                            <div
+                              key={item}
+                              className="how-it-works-page__mockup-provider"
+                            >
+                              <div className="how-it-works-page__mockup-avatar">
+                                {item === 1 ? "✓" : "P"}
+                              </div>
+
+                              <div>
+                                <strong>
+                                  {item === 1
+                                    ? "Verified Professional"
+                                    : "Local Specialist"}
+                                </strong>
+                                <span>
+                                  4.{8 + item} ★ · {item}.2 km
+                                </span>
+                              </div>
+
+                              <b>₦{item === 1 ? "18k" : "20k"}</b>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {journeySteps[activeStep].visual === "book" && (
+                        <div className="how-it-works-page__mockup-booking">
+                          <div>
+                            <span>Service</span>
+                            <strong>AC Repair</strong>
+                          </div>
+
+                          <div>
+                            <span>Date</span>
+                            <strong>Tomorrow · 10:00 AM</strong>
+                          </div>
+
+                          <div>
+                            <span>Location</span>
+                            <strong>Lagos, Nigeria</strong>
+                          </div>
+
+                          <div className="how-it-works-page__mockup-booking-total">
+                            <span>Estimated total</span>
+                            <strong>₦18,000</strong>
+                          </div>
+                        </div>
+                      )}
+
+                      {journeySteps[activeStep].visual === "track" && (
+                        <div className="how-it-works-page__mockup-track">
+                          <div className="how-it-works-page__track-map">
+                            <div className="how-it-works-page__track-route" />
+                            <div className="how-it-works-page__track-client">
+                              <span />
+                            </div>
+                            <div className="how-it-works-page__track-provider">
+                              <span>✓</span>
+                            </div>
+                          </div>
+
+                          <div className="how-it-works-page__track-info">
+                            <span>Provider is on the way</span>
+                            <strong>8 min away</strong>
+                          </div>
+                        </div>
+                      )}
+
+                      {journeySteps[activeStep].visual === "complete" && (
+                        <div className="how-it-works-page__mockup-complete">
+                          <div className="how-it-works-page__complete-check">
+                            ✓
+                          </div>
+
+                          <strong>Service completed</strong>
+
+                          <span>Rate your experience</span>
+
+                          <div className="how-it-works-page__complete-stars">
+                            ★ ★ ★ ★ ★
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================== */}
+        {/* TRUST / PAYMENT */}
+        {/* ===================================================== */}
+
+        <section className="how-it-works-page__trust">
+          <div className="how-it-works-page__container">
+            <div className="how-it-works-page__trust-grid">
+              <div className="how-it-works-page__trust-copy">
+                <span className="how-it-works-page__section-kicker">
+                  Built around confidence
+                </span>
+
+                <h2 className="how-it-works-page__section-title">
+                  You should know who you&apos;re booking.
+                </h2>
+
+                <p>
+                  Trust isn't something we add after the experience.
+                  Verification, reviews, secure payments and clear booking
+                  information are part of the experience from the beginning.
+                </p>
+              </div>
+
+              <div className="how-it-works-page__trust-cards">
+                <div className="how-it-works-page__trust-card">
+                  <span>✓</span>
+                  <div>
+                    <strong>Identity verification</strong>
+                    <p>
+                      Provider identities can be verified before they become
+                      discoverable.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="how-it-works-page__trust-card">
+                  <span>₦</span>
+                  <div>
+                    <strong>Secure payments</strong>
+                    <p>
+                      Payment is handled through a secure checkout experience.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="how-it-works-page__trust-card">
+                  <span>★</span>
+                  <div>
+                    <strong>Reviews that matter</strong>
+                    <p>
+                      Ratings and completed jobs help people make informed
+                      decisions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================== */}
+        {/* PROVIDER FLOW */}
+        {/* ===================================================== */}
+
+        <section className="how-it-works-page__provider">
+          <div className="how-it-works-page__container">
+            <div className="how-it-works-page__provider-card">
+              <div className="how-it-works-page__provider-heading">
+                <span className="how-it-works-page__section-kicker">
+                  For professionals
+                </span>
+
+                <h2 className="how-it-works-page__section-title">
+                  Your skills deserve to be discovered.
+                </h2>
+
+                <p>
+                  Build a professional presence, connect with customers and
+                  manage your service business from one place.
+                </p>
+
+                <Link
+                  href="/provider/start"
+                  className="how-it-works-page__primary-button"
+                >
+                  Become a Provider
+                </Link>
+              </div>
+
+              <div className="how-it-works-page__provider-flow">
+                <div className="how-it-works-page__provider-progress">
+                  <span
+                    style={{
+                      width: `${
+                        ((providerActive + 1) / providerSteps.length) * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+
+                {providerSteps.map((step, index) => (
+                  <button
+                    type="button"
+                    key={step}
+                    className={`how-it-works-page__provider-step ${
+                      providerActive === index
+                        ? "how-it-works-page__provider-step--active"
+                        : ""
+                    }`}
+                    onClick={() => setProviderActive(index)}
+                  >
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+
+                    <strong>{step}</strong>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===================================================== */}
+        {/* FINAL CTA */}
+        {/* ===================================================== */}
+
+        <section className="how-it-works-page__cta">
+          <div className="how-it-works-page__cta-glow" />
+
+          <div className="how-it-works-page__container">
+            <div className="how-it-works-page__cta-content">
+              <span className="how-it-works-page__section-kicker">
+                Ready when you are
+              </span>
+
+              <h2>The right service is closer than you think.</h2>
+
+              <p>
+                Search for a professional, compare your options and get started
+                today.
+              </p>
+
+              <Link href="/search" className="how-it-works-page__cta-button">
+                Start Exploring
               </Link>
             </div>
           </div>
