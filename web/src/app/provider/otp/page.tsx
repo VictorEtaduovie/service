@@ -5,6 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 
+// Temporary dummy data until the backend/database is connected.
+// Add registered provider emails here for testing.
+const REGISTERED_PROVIDER_EMAILS = [
+  "registered@example.com",
+  "provider@test.com",
+];
+
 export default function ProviderOtpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,7 +37,20 @@ export default function ProviderOtpPage() {
   };
 
   const handleVerify = () => {
-    router.push("/provider/register");
+    // Temporary check until backend/database is connected.
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const isRegistered = REGISTERED_PROVIDER_EMAILS.some(
+      (registeredEmail) => registeredEmail.toLowerCase() === normalizedEmail,
+    );
+
+    if (isRegistered) {
+      // Existing provider → go to provider login
+      router.push(`/provider/login?email=${encodeURIComponent(email)}`);
+    } else {
+      // New provider → continue registration
+      router.push(`/provider/register?email=${encodeURIComponent(email)}`);
+    }
   };
 
   return (
