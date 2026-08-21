@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -41,13 +42,42 @@ const platformHighlights = [
 ];
 
 export default function AboutPage() {
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const root = revealRef.current;
+
+    if (!root) return;
+
+    const elements = root.querySelectorAll("[data-about-reveal]");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("about-page__reveal-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -50px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="about-page">
+    <div className="about-page" ref={revealRef}>
       <Navbar />
 
       <main className="about-page__main">
         {/* HERO */}
-        <section className="about-page__hero">
+        <section className="about-page__hero" data-about-reveal="fade-up">
           <div className="about-page__hero-glow about-page__hero-glow--one" />
           <div className="about-page__hero-glow about-page__hero-glow--two" />
 
@@ -83,7 +113,7 @@ export default function AboutPage() {
         </section>
 
         {/* INTRO */}
-        <section className="about-page__intro">
+        <section className="about-page__intro" data-about-reveal="fade-up">
           <div className="about-page__container">
             <div className="about-page__intro-grid">
               <div className="about-page__intro-heading">
@@ -118,7 +148,7 @@ export default function AboutPage() {
         </section>
 
         {/* PLATFORM STORY */}
-        <section className="about-page__story">
+        <section className="about-page__story" data-about-reveal="fade-up">
           <div className="about-page__container">
             <div className="about-page__story-card">
               <div className="about-page__story-content">
@@ -184,6 +214,7 @@ export default function AboutPage() {
 
                 <div className="about-page__visual-floating about-page__visual-floating--top">
                   <span className="about-page__visual-floating-icon">✓</span>
+
                   <div>
                     <small>Identity</small>
                     <strong>Verified</strong>
@@ -192,6 +223,7 @@ export default function AboutPage() {
 
                 <div className="about-page__visual-floating about-page__visual-floating--bottom">
                   <span className="about-page__visual-floating-icon">★</span>
+
                   <div>
                     <small>Reputation</small>
                     <strong>Trusted ratings</strong>
@@ -203,7 +235,7 @@ export default function AboutPage() {
         </section>
 
         {/* VALUES */}
-        <section className="about-page__values">
+        <section className="about-page__values" data-about-reveal="fade-up">
           <div className="about-page__container">
             <div className="about-page__section-heading">
               <span className="about-page__section-kicker">What guides us</span>
@@ -219,8 +251,15 @@ export default function AboutPage() {
             </div>
 
             <div className="about-page__value-grid">
-              {platformValues.map((value) => (
-                <article className="about-page__value-card" key={value.title}>
+              {platformValues.map((value, index) => (
+                <article
+                  className="about-page__value-card"
+                  key={value.title}
+                  data-about-reveal="fade-up"
+                  style={{
+                    transitionDelay: `${index * 80}ms`,
+                  }}
+                >
                   <div className="about-page__value-icon">{value.icon}</div>
 
                   <h3>{value.title}</h3>
@@ -233,10 +272,16 @@ export default function AboutPage() {
         </section>
 
         {/* PLATFORM CAPABILITIES */}
-        <section className="about-page__capabilities">
+        <section
+          className="about-page__capabilities"
+          data-about-reveal="fade-up"
+        >
           <div className="about-page__container">
             <div className="about-page__capabilities-grid">
-              <div className="about-page__capabilities-copy">
+              <div
+                className="about-page__capabilities-copy"
+                data-about-reveal="fade-left"
+              >
                 <span className="about-page__section-kicker">
                   What we're building
                 </span>
@@ -258,7 +303,14 @@ export default function AboutPage() {
 
               <div className="about-page__capability-list">
                 {platformHighlights.map((highlight, index) => (
-                  <div className="about-page__capability-item" key={highlight}>
+                  <div
+                    className="about-page__capability-item"
+                    key={highlight}
+                    data-about-reveal="fade-right"
+                    style={{
+                      transitionDelay: `${index * 70}ms`,
+                    }}
+                  >
                     <span className="about-page__capability-number">
                       {String(index + 1).padStart(2, "0")}
                     </span>
@@ -274,7 +326,7 @@ export default function AboutPage() {
         </section>
 
         {/* TRUST */}
-        <section className="about-page__trust">
+        <section className="about-page__trust" data-about-reveal="fade-up">
           <div className="about-page__container">
             <div className="about-page__trust-card">
               <div>
@@ -301,7 +353,7 @@ export default function AboutPage() {
         </section>
 
         {/* CTA */}
-        <section className="about-page__cta">
+        <section className="about-page__cta" data-about-reveal="fade-up">
           <div className="about-page__container">
             <div className="about-page__cta-card">
               <span className="about-page__cta-kicker">Get started</span>

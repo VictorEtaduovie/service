@@ -15,6 +15,13 @@ type SortOption =
   | "verified"
   | "price";
 
+type ServiceRecord = {
+  id: string | number;
+  name: string;
+  category: string;
+  keywords: string[];
+};
+
 type Provider = {
   id: string;
   name: string;
@@ -38,7 +45,7 @@ const dummyProviders: Provider[] = [
   {
     id: "provider-001",
     name: "Daniel Okoro",
-    serviceIds: ["1"],
+    serviceIds: ["1", "plumbing", "plumber"],
     title: "Professional Plumber",
     specialty: "Residential plumbing & repairs",
     rating: 4.9,
@@ -57,7 +64,7 @@ const dummyProviders: Provider[] = [
   {
     id: "provider-002",
     name: "Michael Adeyemi",
-    serviceIds: ["1"],
+    serviceIds: ["1", "plumbing", "plumber"],
     title: "Licensed Plumbing Specialist",
     specialty: "Pipes, leaks & water systems",
     rating: 4.8,
@@ -75,7 +82,7 @@ const dummyProviders: Provider[] = [
   {
     id: "provider-003",
     name: "Samuel Johnson",
-    serviceIds: ["1"],
+    serviceIds: ["1", "plumbing", "plumber"],
     title: "Emergency Plumber",
     specialty: "Emergency plumbing & maintenance",
     rating: 4.7,
@@ -93,7 +100,7 @@ const dummyProviders: Provider[] = [
   {
     id: "provider-004",
     name: "Victor Martins",
-    serviceIds: ["1"],
+    serviceIds: ["1", "plumbing", "plumber"],
     title: "Plumbing & Maintenance Pro",
     specialty: "Home plumbing & maintenance",
     rating: 4.6,
@@ -111,7 +118,7 @@ const dummyProviders: Provider[] = [
   {
     id: "provider-005",
     name: "Grace Williams",
-    serviceIds: ["1"],
+    serviceIds: ["1", "plumbing", "plumber"],
     title: "Professional Plumber",
     specialty: "Bathroom fittings & installations",
     rating: 4.9,
@@ -151,10 +158,37 @@ const locationSuggestions = [
   "Ajah, Lagos",
 ];
 
+/* ===================================================== */
+/* HELPERS */
+/* ===================================================== */
+
+const createSlug = (value: string) => {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
+const normalizeValue = (value: string) => {
+  return createSlug(value);
+};
+
 export default function ServiceProvidersPage() {
   const params = useParams();
 
-  const serviceId = String(params.serviceId);
+  /*
+   * This route parameter can now be:
+   *
+   * /services/1
+   * /services/plumbing
+   * /services/physiotherapy
+   * /services/ac-repair
+   * /services/electrical-services
+   */
+  const serviceParam = String(params.serviceId || "").trim();
 
   const [sort, setSort] = useState<SortOption>("nearest");
   const [location, setLocation] = useState("Lagos, Nigeria");
@@ -165,13 +199,74 @@ export default function ServiceProvidersPage() {
   const [showVerifiedOnly, setShowVerifiedOnly] = useState(false);
   const [showCertifiedOnly, setShowCertifiedOnly] = useState(false);
 
-  const service = services.find((item) => String(item.id) === serviceId);
+  /* =================================================== */
+  /* RESOLVE SERVICE FROM ID / NAME / SLUG */
+  /* =================================================== */
+
+  const service = useMemo<ServiceRecord | null>(() => {
+    const records = services as ServiceRecord[];
+
+    const normalizedParam = normalizeValue(serviceParam);
+
+    return (
+      records.find((item) => String(item.id) === serviceParam) ||
+      records.find((item) => normalizeValue(item.name) === normalizedParam) ||
+      records.find(
+        (item) => normalizeValue(item.category) === normalizedParam,
+      ) ||
+      null
+    );
+  }, [serviceParam]);
+
+  /*
+   * Even if the service is not yet in services.json,
+   * don't immediately break the page.
+   *
+   * This gives the UI a usable service name from the URL.
+   */
+  const resolvedServiceName = useMemo(() => {
+    if (service) {
+      return service.name;
+    }
+
+    if (!serviceParam) {
+      return "Service";
+    }
+
+    return serviceParam
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+  }, [service, serviceParam]);
+
+  /*
+   * Canonical slug used to match providers.
+   */
+  const resolvedServiceSlug = createSlug(resolvedServiceName);
+
+  /* =================================================== */
+  /* PROVIDER FILTERING */
+  /* =================================================== */
 
   const providerResults = useMemo(() => {
-    let results = dummyProviders.filter((provider) =>
-      provider.serviceIds.includes(serviceId),
-    );
+    let results = dummyProviders.filter((provider) => {
+      return provider.serviceIds.some((serviceId) => {
+        const normalizedProviderService = normalizeValue(serviceId);
 
+        return (
+          normalizedProviderService === serviceParam ||
+          normalizedProviderService === resolvedServiceSlug ||
+          normalizedProviderService === normalizeValue(resolvedServiceName)
+        );
+      });
+    });
+
+    /*
+     * If the service isn't in the provider test data,
+     * still allow the page to render without crashing.
+     *
+     * Later the backend/database will provide the real
+     * matching providers.
+     */
     if (showOnlineOnly) {
       results = results.filter((provider) => provider.online);
     }
@@ -232,7 +327,15 @@ export default function ServiceProvidersPage() {
       default:
         return sorted;
     }
-  }, [serviceId, sort, showOnlineOnly, showVerifiedOnly, showCertifiedOnly]);
+  }, [
+    serviceParam,
+    resolvedServiceName,
+    resolvedServiceSlug,
+    sort,
+    showOnlineOnly,
+    showVerifiedOnly,
+    showCertifiedOnly,
+  ]);
 
   const filteredLocationSuggestions = locationSuggestions.filter((item) =>
     item.toLowerCase().includes(locationQuery.toLowerCase()),
@@ -247,47 +350,26 @@ export default function ServiceProvidersPage() {
 
   const activeSort = sortOptions.find((item) => item.id === sort);
 
-  if (!service) {
-    return (
-      <div className="service-results">
-        <Navbar />
-
-        <main className="service-results__empty-page">
-          <div className="service-results__empty-card">
-            <div className="service-results__empty-icon">?</div>
-
-            <h1>Service not found</h1>
-
-            <p>We couldn't find the service you're looking for.</p>
-
-            <Link
-              href="/categories"
-              className="service-results__primary-button"
-            >
-              Browse Services
-            </Link>
-          </div>
-        </main>
-
-        <SiteFooter />
-      </div>
-    );
-  }
-
   return (
     <div className="service-results">
       <Navbar />
 
       <main className="service-results__main">
+        {/* ================================================= */}
         {/* HERO */}
+        {/* ================================================= */}
+
         <section className="service-results__hero">
           <div className="service-results__container">
             <div className="service-results__breadcrumbs">
               <Link href="/">Home</Link>
               <span>›</span>
+
               <Link href="/categories">Services</Link>
+
               <span>›</span>
-              <strong>{service.name}</strong>
+
+              <strong>{resolvedServiceName}</strong>
             </div>
 
             <div className="service-results__hero-content">
@@ -297,17 +379,21 @@ export default function ServiceProvidersPage() {
                 </span>
 
                 <h1 className="service-results__title">
-                  {service.name}
+                  {resolvedServiceName}
                   <span> professionals near you</span>
                 </h1>
 
                 <p className="service-results__description">
-                  Compare trusted {service.name.toLowerCase()} professionals by
-                  distance, rating, availability and verification.
+                  Compare trusted {resolvedServiceName.toLowerCase()}{" "}
+                  professionals by distance, rating, availability and
+                  verification.
                 </p>
               </div>
 
+              {/* ================================================= */}
               {/* LOCATION */}
+              {/* ================================================= */}
+
               <div className="service-results__location-wrap">
                 <button
                   type="button"
@@ -318,6 +404,7 @@ export default function ServiceProvidersPage() {
 
                   <span className="service-results__location-content">
                     <small>Searching near</small>
+
                     <strong>{location}</strong>
                   </span>
 
@@ -345,12 +432,15 @@ export default function ServiceProvidersPage() {
                       className="service-results__current-location"
                       onClick={() => {
                         setLocation("Current location");
+
                         setLocationOpen(false);
                       }}
                     >
                       <span>◎</span>
+
                       <div>
                         <strong>Use my current location</strong>
+
                         <small>Use your device location</small>
                       </div>
                     </button>
@@ -362,6 +452,7 @@ export default function ServiceProvidersPage() {
                           type="button"
                           onClick={() => {
                             setLocation(suggestion);
+
                             setLocationOpen(false);
                             setLocationQuery("");
                           }}
@@ -378,13 +469,16 @@ export default function ServiceProvidersPage() {
           </div>
         </section>
 
+        {/* ================================================= */}
         {/* RESULTS */}
+        {/* ================================================= */}
+
         <section className="service-results__content">
           <div className="service-results__container">
             <div className="service-results__toolbar">
               <div className="service-results__result-summary">
                 <strong>
-                  {providerResults.length} {service.name.toLowerCase()}{" "}
+                  {providerResults.length} {resolvedServiceName.toLowerCase()}{" "}
                   {providerResults.length === 1
                     ? "professional"
                     : "professionals"}
@@ -408,10 +502,14 @@ export default function ServiceProvidersPage() {
               </button>
             </div>
 
+            {/* ================================================= */}
             {/* SORT */}
+            {/* ================================================= */}
+
             <div className="service-results__sort-bar">
               <div className="service-results__sort-heading">
                 <strong>Browse by</strong>
+
                 <span>Choose how you want to compare providers</span>
               </div>
 
@@ -428,14 +526,20 @@ export default function ServiceProvidersPage() {
                     onClick={() => setSort(option.id)}
                   >
                     <span>{option.icon}</span>
+
                     <strong>{option.label}</strong>
                   </button>
                 ))}
               </div>
             </div>
 
+            {/* ================================================= */}
+            {/* MAIN LAYOUT */}
+            {/* ================================================= */}
+
             <div className="service-results__layout">
               {/* FILTERS */}
+
               <aside
                 id="service-results-filters"
                 className="service-results__filters"
@@ -444,6 +548,7 @@ export default function ServiceProvidersPage() {
                   <div className="service-results__filter-header">
                     <div>
                       <strong>Refine results</strong>
+
                       <span>More control over your search</span>
                     </div>
 
@@ -520,15 +625,21 @@ export default function ServiceProvidersPage() {
 
                     <select defaultValue="25">
                       <option value="5">Within 5 km</option>
+
                       <option value="10">Within 10 km</option>
+
                       <option value="25">Within 25 km</option>
+
                       <option value="50">Within 50 km</option>
                     </select>
                   </div>
                 </div>
               </aside>
 
+              {/* ================================================= */}
               {/* PROVIDERS */}
+              {/* ================================================= */}
+
               <div className="service-results__providers">
                 {providerResults.length === 0 ? (
                   <div className="service-results__no-results">
@@ -537,8 +648,11 @@ export default function ServiceProvidersPage() {
                     <h2>No matching professionals</h2>
 
                     <p>
-                      Try removing one or more filters to see more
-                      {service.name.toLowerCase()} professionals.
+                      We don't have dummy providers registered for{" "}
+                      <strong>{resolvedServiceName}</strong> yet.
+                      <br />
+                      The page is ready for the real provider data from your
+                      backend.
                     </p>
                   </div>
                 ) : (
@@ -548,6 +662,7 @@ export default function ServiceProvidersPage() {
                       className="service-results__provider-card"
                     >
                       {/* IMAGE */}
+
                       <div className="service-results__provider-photo-wrap">
                         <img
                           src={provider.image}
@@ -562,7 +677,8 @@ export default function ServiceProvidersPage() {
                         )}
                       </div>
 
-                      {/* MAIN INFO */}
+                      {/* INFO */}
+
                       <div className="service-results__provider-info">
                         <div className="service-results__provider-name-row">
                           <h2>{provider.name}</h2>
@@ -602,11 +718,13 @@ export default function ServiceProvidersPage() {
 
                         <div className="service-results__provider-location">
                           <span>⌖</span>
+
                           {provider.location}
                         </div>
                       </div>
 
-                      {/* ACTION AREA */}
+                      {/* ACTIONS */}
+
                       <div className="service-results__provider-action">
                         <div className="service-results__provider-price">
                           <small>Starting from</small>

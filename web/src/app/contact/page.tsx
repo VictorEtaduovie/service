@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
@@ -16,7 +16,36 @@ const contactTopics = [
 ];
 
 export default function ContactPage() {
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
   const [formSubmitted, setFormSubmitted] = useState(false);
+
+  useEffect(() => {
+    const root = revealRef.current;
+
+    if (!root) return;
+
+    const elements = root.querySelectorAll("[data-contact-reveal]");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("contact-page__reveal-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -50px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,12 +56,12 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="contact-page">
+    <div className="contact-page" ref={revealRef}>
       <Navbar />
 
       <main className="contact-page__main">
         {/* HERO */}
-        <section className="contact-page__hero">
+        <section className="contact-page__hero" data-contact-reveal="fade-up">
           <div className="contact-page__container">
             <div className="contact-page__hero-content">
               <span className="contact-page__eyebrow">Contact Support</span>
@@ -48,11 +77,17 @@ export default function ContactPage() {
         </section>
 
         {/* CONTACT CONTENT */}
-        <section className="contact-page__support">
+        <section
+          className="contact-page__support"
+          data-contact-reveal="fade-up"
+        >
           <div className="contact-page__container">
             <div className="contact-page__layout">
               {/* LEFT SIDE */}
-              <div className="contact-page__information">
+              <div
+                className="contact-page__information"
+                data-contact-reveal="fade-left"
+              >
                 <div className="contact-page__information-header">
                   <span className="contact-page__section-kicker">
                     Support options
@@ -69,7 +104,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="contact-page__support-options">
-                  <Link href="/help" className="contact-page__support-option">
+                  <Link
+                    href="/help"
+                    className="contact-page__support-option"
+                    data-contact-reveal="fade-up"
+                    style={{ transitionDelay: "80ms" }}
+                  >
                     <div className="contact-page__support-option-icon">?</div>
 
                     <div>
@@ -81,7 +121,11 @@ export default function ContactPage() {
                     </div>
                   </Link>
 
-                  <div className="contact-page__support-option">
+                  <div
+                    className="contact-page__support-option"
+                    data-contact-reveal="fade-up"
+                    style={{ transitionDelay: "160ms" }}
+                  >
                     <div className="contact-page__support-option-icon">✉</div>
 
                     <div>
@@ -94,7 +138,11 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <div className="contact-page__support-option">
+                  <div
+                    className="contact-page__support-option"
+                    data-contact-reveal="fade-up"
+                    style={{ transitionDelay: "240ms" }}
+                  >
                     <div className="contact-page__support-option-icon">🕘</div>
 
                     <div>
@@ -110,7 +158,10 @@ export default function ContactPage() {
               </div>
 
               {/* FORM */}
-              <div className="contact-page__form-card">
+              <div
+                className="contact-page__form-card"
+                data-contact-reveal="fade-right"
+              >
                 {!formSubmitted ? (
                   <>
                     <div className="contact-page__form-header">
@@ -225,7 +276,7 @@ export default function ContactPage() {
         </section>
 
         {/* BOTTOM CTA */}
-        <section className="contact-page__bottom">
+        <section className="contact-page__bottom" data-contact-reveal="fade-up">
           <div className="contact-page__container">
             <div className="contact-page__bottom-card">
               <div>

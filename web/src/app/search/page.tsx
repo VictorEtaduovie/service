@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import { useRouter } from "next/navigation";
 import SiteFooter from "../../components/SiteFooter";
 import SearchBar from "@/components/SearchBar";
+import { createPortal } from "react-dom";
 
-/* --------------------------
-   Types
-   -------------------------- */
+/* =========================================================
+   TYPES
+========================================================= */
 
 type Subcategory = {
   id: string;
@@ -40,11 +42,9 @@ type PopularService = {
   image?: string;
 };
 
-/* --------------------------
-   Mock Data
-   Replace images with local
-   /public paths for production
-   -------------------------- */
+/* =========================================================
+   MOCK DATA
+========================================================= */
 
 const MOCK_SECTORS: Sector[] = [
   {
@@ -172,7 +172,6 @@ const MOCK_POPULAR: PopularService[] = [
     image:
       "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?q=80&w=1200&auto=format&fit=crop",
   },
-
   {
     id: "plumber",
     name: "Plumber",
@@ -180,7 +179,6 @@ const MOCK_POPULAR: PopularService[] = [
     image:
       "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?q=80&w=1200&auto=format&fit=crop",
   },
-
   {
     id: "electrician",
     name: "Electrician",
@@ -188,7 +186,6 @@ const MOCK_POPULAR: PopularService[] = [
     image:
       "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1200&auto=format&fit=crop",
   },
-
   {
     id: "cleaner",
     name: "Home Cleaning",
@@ -198,25 +195,72 @@ const MOCK_POPULAR: PopularService[] = [
   },
 ];
 
-/* --------------------------
-   Page
-   -------------------------- */
+/* =========================================================
+   PAGE
+========================================================= */
 
 export default function SearchPage() {
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const elements = revealRef.current?.querySelectorAll(
+      "[data-search-reveal]",
+    );
+
+    if (!elements || elements.length === 0) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("search-reveal-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -50px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="bg-light min-vh-100 text-dark search-page">
       <Navbar />
 
-      <main className="container py-5">
+      <main ref={revealRef} className="container py-5">
+        {/* =====================================================
+            HERO / HEADER — KEEPING YOUR EXISTING SEARCH EXPERIENCE
+        ====================================================== */}
+
         <PageHeader />
+
+        {/* =====================================================
+            SECTORS
+        ====================================================== */}
 
         <section className="mt-5">
           <SectorGrid sectors={MOCK_SECTORS} />
         </section>
 
+        {/* =====================================================
+            POPULAR SERVICES
+        ====================================================== */}
+
         <section className="mt-5">
           <QuickAccess items={MOCK_POPULAR} />
         </section>
+
+        {/* =====================================================
+            AI SERVICE ASSISTANT
+        ====================================================== */}
 
         <section className="mt-5">
           <AIServiceSuggest />
@@ -228,9 +272,9 @@ export default function SearchPage() {
   );
 }
 
-/* --------------------------
-   Header
-   -------------------------- */
+/* =========================================================
+   HEADER
+========================================================= */
 
 function PageHeader() {
   return (
@@ -246,9 +290,9 @@ function PageHeader() {
   );
 }
 
-/* --------------------------
-   Sector Grid
-   -------------------------- */
+/* =========================================================
+   SECTOR GRID
+========================================================= */
 
 function SectorGrid({ sectors }: { sectors: Sector[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -258,109 +302,103 @@ function SectorGrid({ sectors }: { sectors: Sector[] }) {
   }
 
   return (
-    <section>
-      <h2 className="other_section_title mb-3">Sectors</h2>
+    <section className="search-sectors" aria-labelledby="search-sectors-title">
+      <div className="search-sectors__heading" data-search-reveal="fade-up">
+        <div>
+          <span className="search-sectors__eyebrow">
+            Explore the marketplace
+          </span>
 
-      <div className="row g-3">
-        {sectors.map((sector) => {
+          <h2 id="search-sectors-title">
+            Find the service category that fits your need.
+          </h2>
+
+          <p>
+            Browse by sector, explore categories, and discover the professionals
+            you need.
+          </p>
+        </div>
+
+        <span className="search-sectors__count">{sectors.length} sectors</span>
+      </div>
+
+      <div className="search-sectors__grid">
+        {sectors.map((sector, index) => {
           const isExpanded = expanded === sector.id;
 
           return (
-            <div key={sector.id} className="col-12 col-sm-6 col-lg-4 col-xl-3">
-              <div className="card h-100 border-0 shadow-sm sector-card">
-                {/* IMAGE */}
-                <div
-                  className="position-relative sector-card__media overflow-hidden"
-                  style={{
-                    borderTopLeftRadius: 12,
-                    borderTopRightRadius: 12,
-                  }}
-                >
-                  {sector.image ? (
-                    <img
-                      src={sector.image}
-                      alt={sector.name}
-                      style={{
-                        width: "100%",
-                        height: 200,
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className="bg-secondary"
-                      style={{
-                        height: 200,
-                      }}
-                    />
-                  )}
+            <article
+              key={sector.id}
+              className={`search-sector-card ${
+                isExpanded ? "search-sector-card--expanded" : ""
+              }`}
+              data-search-reveal="zoom"
+              style={{
+                transitionDelay: `${index * 65}ms`,
+              }}
+            >
+              {/* VISUAL AREA */}
 
-                  {/* OVERLAY */}
-                  <div className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-end p-3 sector-card__overlay">
-                    <div className="d-flex align-items-center justify-content-between w-100 gap-2">
-                      <div className="d-flex align-items-center gap-2">
-                        <div
-                          className="sector-card__icon fs-3 bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
-                          style={{
-                            width: 44,
-                            height: 44,
-                          }}
-                        >
-                          {sector.icon}
-                        </div>
-
-                        <div className="text-white">
-                          <div className="h6 mb-0">{sector.name}</div>
-
-                          {sector.serviceCount ? (
-                            <small>{sector.serviceCount} services</small>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-light text-primary"
-                        onClick={() => toggleSector(sector.id)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`sector-${sector.id}-content`}
-                      >
-                        {isExpanded ? "Collapse" : "View"}
-                      </button>
-                    </div>
+              <button
+                type="button"
+                className="search-sector-card__visual"
+                onClick={() => toggleSector(sector.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`sector-panel-${sector.id}`}
+              >
+                {sector.image ? (
+                  <img src={sector.image} alt="" />
+                ) : (
+                  <div className="search-sector-card__fallback">
+                    {sector.icon}
                   </div>
+                )}
+
+                <div className="search-sector-card__image-overlay" />
+
+                <div className="search-sector-card__top">
+                  <span className="search-sector-card__icon">
+                    {sector.icon}
+                  </span>
+
+                  {sector.serviceCount ? (
+                    <span className="search-sector-card__count">
+                      {sector.serviceCount.toLocaleString()}+
+                    </span>
+                  ) : null}
                 </div>
 
-                {/* CARD BODY */}
-                <div className="card-body">
-                  {sector.description && (
-                    <p className="text-muted small mb-2">
-                      {sector.description}
-                    </p>
-                  )}
+                <div className="search-sector-card__bottom">
+                  <div>
+                    <h3>{sector.name}</h3>
 
-                  {isExpanded && (
-                    <div
-                      id={`sector-${sector.id}-content`}
-                      className="mt-3 border-top pt-3"
-                    >
-                      {sector.categories && sector.categories.length > 0 ? (
-                        <div className="row g-2">
-                          {sector.categories.map((category) => (
-                            <div key={category.id} className="col-12 col-sm-6">
-                              <CategoryCard category={category} />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <EmptySector />
-                      )}
-                    </div>
-                  )}
+                    <p>{sector.description}</p>
+                  </div>
+
+                  <span className="search-sector-card__arrow">
+                    {isExpanded ? "−" : "↗"}
+                  </span>
                 </div>
+              </button>
+
+              {/* EXPANDED CATEGORY AREA */}
+
+              <div
+                id={`sector-panel-${sector.id}`}
+                className="search-sector-card__panel"
+                hidden={!isExpanded}
+              >
+                {sector.categories && sector.categories.length > 0 ? (
+                  <div className="search-sector-card__categories">
+                    {sector.categories.map((category) => (
+                      <CategoryCard key={category.id} category={category} />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptySector />
+                )}
               </div>
-            </div>
+            </article>
           );
         })}
       </div>
@@ -368,12 +406,12 @@ function SectorGrid({ sectors }: { sectors: Sector[] }) {
   );
 }
 
-/* --------------------------
-   Category Card
-   -------------------------- */
+/* =========================================================
+   CATEGORY CARD
+========================================================= */
 
 function CategoryCard({ category }: { category: Category }) {
-  const [openSubs, setOpenSubs] = useState<boolean>(false);
+  const [openSubs, setOpenSubs] = useState(false);
 
   const router = useRouter();
 
@@ -382,61 +420,57 @@ function CategoryCard({ category }: { category: Category }) {
   }
 
   return (
-    <div className="card border-0 bg-light p-2">
-      <div className="d-flex align-items-start gap-2">
-        <div className="fs-3">{category.icon ?? "🗂️"}</div>
+    <div className="search-category-card">
+      <div className="search-category-card__top">
+        <span className="search-category-card__icon">
+          {category.icon ?? "◈"}
+        </span>
 
-        <div className="flex-grow-1">
-          <div className="d-flex align-items-center justify-content-between gap-2">
-            <h4 className="h6 mb-1">{category.name}</h4>
+        <div className="search-category-card__content">
+          <div className="search-category-card__title-row">
+            <h4>{category.name}</h4>
 
-            {category.subcategories && category.subcategories.length > 0 && (
+            {category.subcategories && category.subcategories.length > 0 ? (
               <button
                 type="button"
-                className="btn btn-sm btn-outline-secondary"
+                className="search-category-card__toggle"
                 onClick={() => setOpenSubs((current) => !current)}
                 aria-expanded={openSubs}
               >
-                {openSubs ? "Hide" : "View"}
+                {openSubs ? "Hide" : "Explore"}
               </button>
-            )}
+            ) : null}
           </div>
 
-          {category.description && (
-            <p className="small text-muted mb-1">{category.description}</p>
-          )}
-
-          {openSubs &&
-            category.subcategories &&
-            category.subcategories.length > 0 && (
-              <ul className="list-unstyled mt-2 mb-0">
-                {category.subcategories.map((sub) => (
-                  <li
-                    key={sub.id}
-                    className="d-flex align-items-center justify-content-between bg-white rounded p-2 mb-2 shadow-sm gap-2"
-                  >
-                    <span className="small">{sub.name}</span>
-
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-primary"
-                      onClick={() => gotoSubSearch(sub)}
-                    >
-                      Explore
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+          {category.description ? <p>{category.description}</p> : null}
         </div>
       </div>
+
+      {openSubs &&
+      category.subcategories &&
+      category.subcategories.length > 0 ? (
+        <div className="search-category-card__subs">
+          {category.subcategories.map((sub) => (
+            <button
+              key={sub.id}
+              type="button"
+              className="search-category-card__sub"
+              onClick={() => gotoSubSearch(sub)}
+            >
+              <span>{sub.name}</span>
+
+              <span>→</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-/* --------------------------
-   Empty Sector
-   -------------------------- */
+/* =========================================================
+   EMPTY SECTOR
+========================================================= */
 
 function EmptySector() {
   const router = useRouter();
@@ -460,178 +494,115 @@ function EmptySector() {
   );
 }
 
-/* --------------------------
-   Popular Services
-   -------------------------- */
+/* =========================================================
+   POPULAR SERVICES
+========================================================= */
 
 function QuickAccess({ items }: { items: PopularService[] }) {
   return (
-    <section className="home_popular py-5">
-      <h2 className="other_section_title mb-5 text-center">
-        Popular Services Near You
-      </h2>
+    <section className="search-popular" aria-labelledby="search-popular-title">
+      <div className="search-popular__heading" data-search-reveal="fade-up">
+        <div>
+          <span className="search-popular__eyebrow">Popular right now</span>
 
-      <div className="container-fluid px-0">
-        {items.map((item, index) => {
-          const reverse = index % 2 === 1;
+          <h2 id="search-popular-title">Services people are searching for.</h2>
 
-          return (
-            <div
-              key={item.id}
-              className={`py-5 ${reverse ? "bg-light" : "bg-white"}`}
-            >
-              <div
-                className={`container row align-items-center mx-auto ${
-                  reverse ? "flex-md-row-reverse" : ""
-                }`}
-              >
-                {/* IMAGE SIDE */}
+          <p>
+            Jump straight into some of the most requested services on the
+            marketplace.
+          </p>
+        </div>
+      </div>
 
-                <div className="col-12 col-md-6 mb-4 mb-md-0">
-                  <div
-                    className="position-relative overflow-hidden shadow"
-                    style={{
-                      borderRadius: "20px",
-                    }}
-                  >
-                    {item.image ? (
-                      <>
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="img-fluid w-100 quick-access-image"
-                          style={{
-                            objectFit: "cover",
-                            minHeight: "350px",
-                            display: "block",
-                          }}
-                        />
+      <div className="search-popular__list">
+        {items.map((item, index) => (
+          <article
+            key={item.id}
+            className="search-popular__item"
+            data-search-reveal="fade-up"
+            style={{
+              transitionDelay: `${index * 110}ms`,
+            }}
+          >
+            <div className="search-popular__visual">
+              {item.image ? <img src={item.image} alt={item.name} /> : null}
 
-                        <div
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            background:
-                              "linear-gradient(to top, rgba(0,0,0,0.45), rgba(0,0,0,0.05))",
-                          }}
-                          aria-hidden="true"
-                        />
-                      </>
-                    ) : (
-                      <div
-                        className="quick-access-placeholder"
-                        style={{
-                          minHeight: "350px",
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
+              <div className="search-popular__visual-overlay" />
 
-                {/* CONTENT SIDE */}
+              <span className="search-popular__service-icon">{item.icon}</span>
+            </div>
 
-                <div className="col-12 col-md-6">
-                  <div className="px-md-5">
-                    <div
-                      className="mb-3"
-                      style={{
-                        fontSize: "2.5rem",
-                      }}
-                      aria-hidden="true"
-                    >
-                      {item.icon}
-                    </div>
+            <div className="search-popular__body">
+              <span className="search-popular__label">Popular service</span>
 
-                    <h3 className="fw-bold mb-3 display-6">{item.name}</h3>
+              <h3>{item.name}</h3>
 
-                    <p className="text-muted mb-4 fs-5">
-                      Trusted professionals delivering reliable{" "}
-                      {item.name.toLowerCase()} services in your area. Fast
-                      response, verified providers, and guaranteed quality.
-                    </p>
+              <p>
+                Find trusted professionals offering {item.name.toLowerCase()}{" "}
+                services near you.
+              </p>
 
-                    <div className="d-flex flex-wrap gap-3">
-                      <a
-                        href={`/search?query=${encodeURIComponent(item.name)}`}
-                        className="btn btn-primary px-4 py-2"
-                        style={{
-                          borderRadius: "12px",
-                        }}
-                      >
-                        Explore Service
-                      </a>
+              <div className="search-popular__actions">
+                <Link
+                  href={`/search?query=${encodeURIComponent(item.name)}`}
+                  className="search-popular__primary"
+                >
+                  Explore service
+                </Link>
 
-                      <a
-                        href={`/search?query=${encodeURIComponent(
-                          item.name,
-                        )}&filter=top`}
-                        className="btn btn-outline-secondary px-4 py-2"
-                        style={{
-                          borderRadius: "12px",
-                        }}
-                      >
-                        Top Providers
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                <Link
+                  href={`/search?query=${encodeURIComponent(
+                    item.name,
+                  )}&filter=top`}
+                  className="search-popular__secondary"
+                >
+                  Top providers
+                </Link>
               </div>
             </div>
-          );
-        })}
+          </article>
+        ))}
       </div>
     </section>
   );
 }
 
-/* --------------------------
-   AI Service Suggest
-   -------------------------- */
+/* =========================================================
+   AI SERVICE SUGGEST
+========================================================= */
 
 function AIServiceSuggest() {
   const router = useRouter();
 
-  const [aiOpen, setAiOpen] = useState<boolean>(false);
-
-  const [aiInput, setAiInput] = useState<string>("");
-
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiInput, setAiInput] = useState("");
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
-
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   async function handleAiSuggest() {
     const query = aiInput.trim();
 
-    if (!query) {
-      setAiSuggestion(null);
-      return;
-    }
+    if (!query) return;
 
     setLoading(true);
 
     await new Promise((resolve) => setTimeout(resolve, 350));
 
-    type Candidate = {
+    const candidates: {
       name: string;
       text: string;
-    };
-
-    const candidates: Candidate[] = [];
+    }[] = [];
 
     MOCK_SECTORS.forEach((sector) => {
       candidates.push({
         name: sector.name,
-        text: (sector.name + " " + (sector.description ?? "")).toLowerCase(),
+        text: `${sector.name} ${sector.description ?? ""}`.toLowerCase(),
       });
 
       sector.categories?.forEach((category) => {
         candidates.push({
           name: category.name,
-          text: (
-            category.name +
-            " " +
-            (category.description ?? "")
-          ).toLowerCase(),
+          text: `${category.name} ${category.description ?? ""}`.toLowerCase(),
         });
 
         category.subcategories?.forEach((subcategory) => {
@@ -645,28 +616,18 @@ function AIServiceSuggest() {
 
     const words = query.toLowerCase().split(/\W+/).filter(Boolean);
 
-    const scores = candidates.map((candidate) => {
-      let score = 0;
-
-      for (const word of words) {
-        if (candidate.text.includes(word)) {
-          score += 1;
-        }
-      }
-
-      return {
+    const best = candidates
+      .map((candidate) => ({
         candidate,
-        score,
-      };
-    });
+        score: words.reduce(
+          (score, word) => (candidate.text.includes(word) ? score + 1 : score),
+          0,
+        ),
+      }))
+      .sort((a, b) => b.score - a.score)[0];
 
-    scores.sort((a, b) => b.score - a.score);
+    setAiSuggestion(best && best.score > 0 ? best.candidate.name : query);
 
-    const best = scores[0];
-
-    const suggestion = best && best.score > 0 ? best.candidate.name : query;
-
-    setAiSuggestion(suggestion);
     setLoading(false);
   }
 
@@ -680,107 +641,148 @@ function AIServiceSuggest() {
   function exploreSuggestion() {
     const value = aiSuggestion || aiInput.trim();
 
-    if (!value) {
-      return;
-    }
+    if (!value) return;
+
+    closeModal();
 
     router.push(`/search?service=${encodeURIComponent(value)}`);
   }
 
   return (
-    <div className="card p-3 shadow-sm">
-      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        <div>
-          <strong>Can’t find what you need?</strong>
+    <>
+      {/* =====================================================
+          AI CTA — NO INPUT HERE
+      ====================================================== */}
 
-          <div className="text-muted">
-            Describe your problem and we'll suggest the best service category.
+      <section
+        className="search-ai"
+        aria-labelledby="search-ai-title"
+        data-search-reveal="fade-up"
+      >
+        <div className="search-ai__glow" />
+
+        <div className="search-ai__content">
+          <div className="search-ai__icon" aria-hidden="true">
+            ✦
           </div>
-        </div>
 
-        <div>
+          <div className="search-ai__copy">
+            <span className="search-ai__eyebrow">
+              Can't find exactly what you need?
+            </span>
+
+            <h2 id="search-ai-title">Describe it in your own words.</h2>
+
+            <p>
+              Tell us what you're trying to get done and we'll suggest the
+              closest service category.
+            </p>
+          </div>
+
           <button
             type="button"
-            className="btn btn-outline-primary"
-            onClick={() => {
-              setAiOpen(true);
-              setAiInput("");
-              setAiSuggestion(null);
-            }}
+            className="search-ai__button"
+            onClick={() => setAiOpen(true)}
           >
             Describe your problem
+            <span>→</span>
           </button>
         </div>
-      </div>
+      </section>
 
-      {aiOpen && (
-        <div
-          className="browser_page__ai_modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label="AI service suggestion"
-          style={{
-            marginTop: 16,
-          }}
-        >
-          <div className="browser_page__ai_modal_inner p-3 bg-white rounded shadow">
-            <div className="d-flex align-items-center justify-content-between mb-3">
-              <h4 className="mb-0">Describe your problem</h4>
+      {/* =====================================================
+          ACTUAL POP-UP — COMPLETELY SEPARATE FROM THE SECTION
+      ====================================================== */}
 
-              <button
-                type="button"
-                className="btn-close"
-                aria-label="Close"
-                onClick={closeModal}
-              />
-            </div>
+      {aiOpen && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="search-ai-popup"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="search-ai-popup-title"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  closeModal();
+                }
+              }}
+            >
+              <div className="search-ai-popup__card">
+                <div className="search-ai-popup__header">
+                  <div className="search-ai-popup__identity">
+                    <div className="search-ai-popup__icon">✦</div>
 
-            <textarea
-              className="form-control mb-3"
-              rows={4}
-              value={aiInput}
-              onChange={(e) => setAiInput(e.target.value)}
-              placeholder="e.g., My kitchen sink is leaking and water is coming out from under the cabinet..."
-              aria-label="Describe your problem"
-            />
+                    <div>
+                      <span>Service Assistant</span>
 
-            <div className="d-flex gap-2 justify-content-end">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeModal}
-              >
-                Close
-              </button>
+                      <h2 id="search-ai-popup-title">
+                        What do you need help with?
+                      </h2>
+                    </div>
+                  </div>
 
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleAiSuggest}
-                disabled={loading || !aiInput.trim()}
-              >
-                {loading ? "Suggesting…" : "Suggest"}
-              </button>
-            </div>
-
-            {aiSuggestion && (
-              <div className="browser_page__ai_result mt-3">
-                <strong>Suggested category:</strong>
-
-                <div className="mt-2">
                   <button
                     type="button"
-                    className="btn btn-outline-primary"
-                    onClick={exploreSuggestion}
+                    className="search-ai-popup__close"
+                    onClick={closeModal}
+                    aria-label="Close"
                   >
-                    {aiSuggestion} — Explore
+                    ×
                   </button>
                 </div>
+
+                <div className="search-ai-popup__body">
+                  <p>
+                    Describe the service you need as naturally as you would
+                    explain it to a professional.
+                  </p>
+
+                  <textarea
+                    value={aiInput}
+                    onChange={(event) => setAiInput(event.target.value)}
+                    placeholder="e.g. My kitchen sink is leaking and water is coming out from underneath..."
+                    autoFocus
+                  />
+
+                  <div className="search-ai-popup__actions">
+                    <button
+                      type="button"
+                      className="search-ai-popup__cancel"
+                      onClick={closeModal}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      className="search-ai-popup__submit"
+                      onClick={handleAiSuggest}
+                      disabled={loading || !aiInput.trim()}
+                    >
+                      {loading ? "Finding service..." : "Find Service"}
+                      {!loading && <span>→</span>}
+                    </button>
+                  </div>
+
+                  {aiSuggestion && (
+                    <div className="search-ai-popup__result">
+                      <span>Suggested service</span>
+
+                      <div>
+                        <strong>{aiSuggestion}</strong>
+
+                        <button type="button" onClick={exploreSuggestion}>
+                          Explore →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }

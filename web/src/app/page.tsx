@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
@@ -212,6 +212,32 @@ export default function HomePage() {
       services: ["AC Servicing", "Duct Cleaning", "Maintenance"],
     },
   ];
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const elements = revealRef.current?.querySelectorAll("[data-home-reveal]");
+
+    if (!elements) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("home-reveal-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -60px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
 
   const [expandedProviders, setExpandedProviders] = useState<
     Record<number, boolean>
@@ -225,91 +251,92 @@ export default function HomePage() {
   };
 
   return (
-    <main>
-      <Navbar />
+    <div ref={revealRef}>
+      <main>
+        <Navbar />
 
-      {/* ================================================================ */}
-      {/* HERO SECTION                                                     */}
-      {/* ================================================================ */}
+        {/* ================================================================ */}
+        {/* HERO SECTION                                                     */}
+        {/* ================================================================ */}
 
-      <section className="position-relative min-vh-100 d-flex align-items-center justify-content-center">
-        {/* Background Video */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="position-absolute top-0 start-0 w-100 h-100"
-          style={{
-            objectFit: "cover",
-            zIndex: -2,
-          }}
-        >
-          <source
-            src="https://assets.mixkit.co/videos/preview/mixkit-hand-of-a-professional-worker-repairing-an-ac-unit-34444-large.mp4"
-            type="video/mp4"
+        <section className="position-relative min-vh-100 d-flex align-items-center justify-content-center">
+          {/* Background Video */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="position-absolute top-0 start-0 w-100 h-100"
+            style={{
+              objectFit: "cover",
+              zIndex: -2,
+            }}
+          >
+            <source
+              src="https://assets.mixkit.co/videos/preview/mixkit-hand-of-a-professional-worker-repairing-an-ac-unit-34444-large.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          {/* Cinematic Overlay */}
+          <div
+            className="position-absolute top-0 start-0 w-100 h-100"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
+              zIndex: -1,
+            }}
           />
-        </video>
 
-        {/* Cinematic Overlay */}
-        <div
-          className="position-absolute top-0 start-0 w-100 h-100"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%)",
-            zIndex: -1,
-          }}
-        />
+          <div className="container py-5 text-center">
+            <div className="row justify-content-center">
+              <div className="col-xl-9 col-lg-10">
+                {/* Premium Badge */}
+                <div
+                  className="d-inline-flex align-items-center bg-white bg-opacity-10 px-3 py-2 rounded-pill mb-4 border border-white border-opacity-25 shadow-sm"
+                  style={{
+                    backdropFilter: "blur(10px)",
+                  }}
+                >
+                  <span className="badge bg-primary rounded-pill me-2">
+                    Lagos
+                  </span>
 
-        <div className="container py-5 text-center">
-          <div className="row justify-content-center">
-            <div className="col-xl-9 col-lg-10">
-              {/* Premium Badge */}
-              <div
-                className="d-inline-flex align-items-center bg-white bg-opacity-10 px-3 py-2 rounded-pill mb-4 border border-white border-opacity-25 shadow-sm"
-                style={{
-                  backdropFilter: "blur(10px)",
-                }}
-              >
-                <span className="badge bg-primary rounded-pill me-2">
-                  Lagos
-                </span>
+                  <span className="text-white fw-medium small">
+                    2,400+ Verified Pros available now
+                  </span>
+                </div>
 
-                <span className="text-white fw-medium small">
-                  2,400+ Verified Pros available now
-                </span>
-              </div>
+                {/* Hero Heading */}
+                <h1
+                  className="display-1 fw-bold mb-4 text-white tracking-tighter"
+                  style={{
+                    lineHeight: "1",
+                    textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  Find Trusted Local
+                  <br />
+                  <span className="text-primary">Services Near You</span>
+                </h1>
 
-              {/* Hero Heading */}
-              <h1
-                className="display-1 fw-bold mb-4 text-white tracking-tighter"
-                style={{
-                  lineHeight: "1",
-                  textShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                }}
-              >
-                Find Trusted Local
-                <br />
-                <span className="text-primary">Services Near You</span>
-              </h1>
+                {/* Hero Description */}
+                <p
+                  className="fs-5 text-white mb-5 mx-auto opacity-90"
+                  style={{
+                    maxWidth: "650px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Book verified professionals for home, health, tech, and more.
+                  Experience seamless booking with live tracking and secure
+                  escrow.
+                </p>
 
-              {/* Hero Description */}
-              <p
-                className="fs-5 text-white mb-5 mx-auto opacity-90"
-                style={{
-                  maxWidth: "650px",
-                  fontWeight: "400",
-                }}
-              >
-                Book verified professionals for home, health, tech, and more.
-                Experience seamless booking with live tracking and secure
-                escrow.
-              </p>
-
-              {/* ====================================================== */}
-              {/* SHARED SEARCH BAR                                      */}
-              {/* ====================================================== */}
-              {/*
+                {/* ====================================================== */}
+                {/* SHARED SEARCH BAR                                      */}
+                {/* ====================================================== */}
+                {/*
                 This is now the ONLY search component used by the homepage.
 
                 The complete search implementation lives inside:
@@ -322,635 +349,754 @@ export default function HomePage() {
                 No duplicate search CSS or duplicate autocomplete logic
                 should be created on the search page.
               */}
-              <SearchBar />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* TRUST SECTION                                                    */}
-      {/* ================================================================ */}
-
-      <section
-        className="home_trust bg-white border-bottom"
-        style={{
-          padding: "50px 0",
-        }}
-      >
-        <div
-          className="container"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "24px",
-          }}
-        >
-          {[
-            {
-              title: "Verified Professionals",
-              icon: (
-                <path
-                  d="M9 12l2 2 4-4"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              ),
-            },
-            {
-              title: "Secure Payments",
-              icon: (
-                <rect
-                  x="5"
-                  y="8"
-                  width="14"
-                  height="10"
-                  rx="2"
-                  stroke="white"
-                  strokeWidth="2"
-                />
-              ),
-            },
-            {
-              title: "Live Tracking",
-              icon: (
-                <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="2" />
-              ),
-            },
-            {
-              title: "24/7 Support",
-              icon: (
-                <path
-                  d="M21 15H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
-                  stroke="white"
-                  strokeWidth="2"
-                />
-              ),
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              style={{
-                textAlign: "center",
-                padding: "28px 20px",
-                borderRadius: "var(--radius-lg)",
-                border: "1px solid #e5e7eb",
-                background: "#fff",
-                boxShadow: "var(--shadow-subtle)",
-                transition: "all 0.3s ease",
-              }}
-            >
-              <div
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  margin: "0 auto 18px",
-                  borderRadius: "20px",
-                  background: "var(--primary-gradient)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "var(--shadow-hover)",
-                }}
-              >
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-                  {item.icon}
-                </svg>
+                <SearchBar />
               </div>
-
-              <h5 className="fw-bold mb-0">{item.title}</h5>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* POPULAR CATEGORIES                                               */}
-      {/* ================================================================ */}
-
-      <section
-        className="home_popular"
-        aria-labelledby="popular-services-title"
-      >
-        <div
-          className="home_popular__bg"
-          aria-hidden
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1505691723518-36a6b46a6a93?w=1800&q=60&auto=format&fit=crop')",
-          }}
-        />
-
-        <div className="container home_popular__inner">
-          <div className="home_section_header">
-            <h2 id="popular-services-title" className="home_section_title">
-              Popular Services
-            </h2>
-
-            <p className="home_section_sub">
-              Browse our most-requested categories
-            </p>
           </div>
+        </section>
 
-          <div className="home_popular__grid" role="list">
-            {[
-              {
-                id: "home-services",
-                title: "Home Services",
-                img: "https://images.unsplash.com/photo-1508780709619-79562169bc64?w=1200&q=60",
-              },
-              {
-                id: "beauty",
-                title: "Beauty & Personal Care",
-                img: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&q=60",
-              },
-              {
-                id: "health",
-                title: "Health & Medical",
-                img: "https://images.unsplash.com/photo-1580281657521-1b18f2c9f7b9?w=1200&q=60",
-              },
-              {
-                id: "tech",
-                title: "Tech & Repairs",
-                img: "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=60",
-              },
-              {
-                id: "auto",
-                title: "Automotive",
-                img: "https://images.unsplash.com/photo-1549921296-3a2f3c39d23d?w=1200&q=60",
-              },
-              {
-                id: "cleaning",
-                title: "Cleaning Services",
-                img: "https://images.unsplash.com/photo-1556228720-9b0b2f7e0b42?w=1200&q=60",
-              },
-              {
-                id: "moving",
-                title: "Moving & Delivery",
-                img: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=60",
-              },
-              {
-                id: "tutoring",
-                title: "Education & Tutoring",
-                img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&q=60",
-              },
-            ].map((cat) => (
-              <a
-                key={cat.id}
-                href={`/categories/${encodeURIComponent(cat.id)}`}
-                role="listitem"
-                className="home_popular__item"
-                aria-label={cat.title}
-              >
-                <div
-                  className="home_popular__item_media"
-                  style={{
-                    backgroundImage: `url(${cat.img})`,
-                  }}
-                  role="img"
-                  aria-hidden
-                />
+        {/* {/* ================================================================ */}
+        {/* TRUST / PLATFORM PROMISE */}
+        {/* ================================================================ */}
 
-                <div className="home_popular__item_title">{cat.title}</div>
-              </a>
-            ))}
-          </div>
+        <section
+          className="home-trust-premium"
+          aria-labelledby="home-trust-title"
+        >
+          <div className="home-trust-premium__glow" aria-hidden="true" />
 
-          <div className="home_popular__actions">
-            <a
-              href="/categories"
-              className="home_popular__cta"
-              aria-label="View all categories"
+          <div className="container home-trust-premium__container">
+            <div
+              className="home-trust-premium__intro"
+              data-home-reveal="fade-up"
             >
-              View All Categories
-            </a>
-          </div>
-        </div>
-      </section>
+              <span className="home-trust-premium__eyebrow">
+                Built around trust
+              </span>
 
-      {/* ================================================================ */}
-      {/* FEATURED PROVIDERS                                                */}
-      {/* ================================================================ */}
+              <h2 id="home-trust-title">
+                A better way to book local services.
+              </h2>
 
-      <section
-        className="home_featured"
-        aria-labelledby="featured-providers-title"
-      >
-        <div className="container home_featured_container">
-          <div className="home_section_header">
-            <h2 id="featured-providers-title" className="home_section_title">
-              Top Rated Providers Near You
-            </h2>
+              <p>
+                Everything you need to discover professionals, make confident
+                decisions and stay in control from booking to completion.
+              </p>
+            </div>
 
-            <p className="home_section_sub">
-              Trusted professionals delivering quality service in your area
-            </p>
-          </div>
-
-          <div className="home_featured_grid">
-            {providers.map((provider) => {
-              const isExpanded = !!expandedProviders[provider.id];
-
-              return (
+            <div className="home-trust-premium__grid">
+              {[
+                {
+                  key: "verified",
+                  number: "01",
+                  title: "Verified Professionals",
+                  text: "Identity and professional information can be reviewed before providers become discoverable.",
+                  icon: "✓",
+                },
+                {
+                  key: "payment",
+                  number: "02",
+                  title: "Secure Payments",
+                  text: "Your payment journey is designed around secure checkout and protected transactions.",
+                  icon: "₦",
+                },
+                {
+                  key: "tracking",
+                  number: "03",
+                  title: "Live Tracking",
+                  text: "For eligible in-person services, see your provider's journey and arrival status in real time.",
+                  icon: "⌖",
+                },
+                {
+                  key: "support",
+                  number: "04",
+                  title: "24/7 Support",
+                  text: "Help is available when something doesn't go according to plan.",
+                  icon: "?",
+                },
+              ].map((item, index) => (
                 <article
-                  key={provider.id}
-                  className="home_featured_card"
-                  aria-labelledby={`provider-${provider.id}`}
+                  key={item.key}
+                  className="home-trust-premium__card"
+                  data-home-reveal="fade-up"
+                  style={{
+                    transitionDelay: `${index * 90}ms`,
+                  }}
                 >
-                  <div className="home_featured_card_media">
-                    <img
-                      src={provider.img}
-                      alt={`${provider.name} profile`}
-                      className="home_featured_card_image"
-                      width={320}
-                      height={220}
-                    />
+                  <div className="home-trust-premium__card-top">
+                    <span className="home-trust-premium__number">
+                      {item.number}
+                    </span>
+
+                    <span className="home-trust-premium__icon">
+                      {item.icon}
+                    </span>
                   </div>
 
-                  <div className="home_featured_card_body">
-                    <div className="home_featured_card_head">
-                      <h3
-                        id={`provider-${provider.id}`}
-                        className="home_featured_card_name"
-                      >
-                        {provider.name}
-                      </h3>
+                  <div className="home-trust-premium__card-body">
+                    <h3>{item.title}</h3>
+                    <p>{item.text}</p>
+                  </div>
 
-                      <div className="home_featured_card_price">
-                        From ${provider.price}
+                  <span className="home-trust-premium__card-line" />
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================ */}
+        {/* POPULAR SERVICES */}
+        {/* ================================================================ */}
+
+        <section
+          className="home-services-premium"
+          aria-labelledby="home-services-title"
+        >
+          <div className="container home-services-premium__container">
+            <div
+              className="home-services-premium__heading"
+              data-home-reveal="fade-up"
+            >
+              <div>
+                <span className="home-services-premium__eyebrow">
+                  Explore the marketplace
+                </span>
+
+                <h2 id="home-services-title">
+                  Services people are booking right now.
+                </h2>
+
+                <p>
+                  Discover trusted professionals across the services that matter
+                  most.
+                </p>
+              </div>
+
+              <Link
+                href="/categories"
+                className="home-services-premium__heading-link"
+              >
+                Explore all services →
+              </Link>
+            </div>
+
+            <div className="home-services-premium__grid">
+              {[
+                {
+                  id: "home-services",
+                  title: "Home Services",
+                  description: "Repairs, maintenance and installations.",
+                  image:
+                    "https://images.unsplash.com/photo-1505691723518-36a6b46a6a93?w=1200&q=80",
+                },
+                {
+                  id: "beauty",
+                  title: "Beauty & Personal Care",
+                  description: "Beauty, grooming and personal services.",
+                  image:
+                    "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&q=80",
+                },
+                {
+                  id: "health",
+                  title: "Health & Medical",
+                  description: "Healthcare professionals and services.",
+                  image:
+                    "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80",
+                },
+                {
+                  id: "tech",
+                  title: "Tech & Repairs",
+                  description: "Technology support and device repairs.",
+                  image:
+                    "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=1200&q=80",
+                },
+                {
+                  id: "auto",
+                  title: "Automotive",
+                  description: "Mechanics, diagnostics and vehicle care.",
+                  image:
+                    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80",
+                },
+                {
+                  id: "cleaning",
+                  title: "Cleaning Services",
+                  description: "Reliable cleaning for homes and businesses.",
+                  image:
+                    "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80",
+                },
+                {
+                  id: "moving",
+                  title: "Moving & Delivery",
+                  description: "Moving, logistics and local delivery.",
+                  image:
+                    "https://images.unsplash.com/photo-1600518464441-9154a6d6f7c9?w=1200&q=80",
+                },
+                {
+                  id: "education",
+                  title: "Education & Tutoring",
+                  description: "Tutors and learning professionals.",
+                  image:
+                    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&q=80",
+                },
+              ].map((category, index) => (
+                <Link
+                  key={category.id}
+                  href={`/categories/${category.id}`}
+                  className="home-services-premium__card"
+                  data-home-reveal="zoom"
+                  style={{
+                    transitionDelay: `${index * 70}ms`,
+                  }}
+                >
+                  <div
+                    className="home-services-premium__image"
+                    style={{
+                      backgroundImage: `url(${category.image})`,
+                    }}
+                  />
+
+                  <div className="home-services-premium__overlay" />
+
+                  <div className="home-services-premium__content">
+                    <span className="home-services-premium__arrow">↗</span>
+
+                    <h3>{category.title}</h3>
+
+                    <p>{category.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================ */}
+        {/* FEATURED PROVIDERS */}
+        {/* ================================================================ */}
+
+        <section
+          className="home-providers-premium"
+          aria-labelledby="home-providers-title"
+        >
+          <div className="container home-providers-premium__container">
+            <div
+              className="home-providers-premium__heading"
+              data-home-reveal="fade-up"
+            >
+              <div>
+                <span className="home-providers-premium__eyebrow">
+                  Trusted in your area
+                </span>
+
+                <h2 id="home-providers-title">Professionals worth knowing.</h2>
+
+                <p>
+                  Explore highly rated providers and compare what matters before
+                  you book.
+                </p>
+              </div>
+
+              <Link
+                href="/search"
+                className="home-providers-premium__heading-link"
+              >
+                See all providers →
+              </Link>
+            </div>
+
+            <div className="home-providers-premium__grid">
+              {providers.slice(0, 4).map((provider, index) => (
+                <article
+                  key={provider.id}
+                  className="home-providers-premium__card"
+                  data-home-reveal="fade-up"
+                  style={{
+                    transitionDelay: `${index * 100}ms`,
+                  }}
+                >
+                  <div className="home-providers-premium__media">
+                    <img src={provider.img} alt={`${provider.name} profile`} />
+
+                    <span className="home-providers-premium__online">
+                      <i />
+                      Available
+                    </span>
+
+                    <span className="home-providers-premium__rating">
+                      ★ {provider.rating.toFixed(1)}
+                    </span>
+                  </div>
+
+                  <div className="home-providers-premium__body">
+                    <div className="home-providers-premium__name-row">
+                      <div>
+                        <h3>{provider.name}</h3>
+                        <span>Verified Professional</span>
                       </div>
+
+                      <strong>From ${provider.price}</strong>
                     </div>
 
-                    <div className="home_featured_card_meta">
-                      <div className="home_featured_card_rating" aria-hidden>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          className="home_featured__star"
-                          aria-hidden
-                        >
-                          <path
-                            d="M12 17.3l-6.16 3.24 1.18-6.88L2 9.76l6.92-1.01L12 2l3.08 6.75L22 9.76l-5.02 3.9 1.18 6.88z"
-                            fill="#F59E0B"
-                          />
-                        </svg>
-
-                        <span className="home_featured__rating_value">
-                          {provider.rating.toFixed(1)}
-                        </span>
-                      </div>
-
-                      <div className="home_featured__distance">
-                        {provider.distance} km away
-                      </div>
+                    <div className="home-providers-premium__location">
+                      ⌖ {provider.distance} km away
                     </div>
 
-                    {/* SERVICES TAGS */}
-                    <div
-                      className={`home_featured_card_services ${
-                        isExpanded ? "is-expanded" : ""
-                      }`}
-                    >
-                      {provider.services.map((service, idx) => (
-                        <span key={idx} className="home_featured_card_service">
-                          {service}
-                        </span>
+                    <div className="home-providers-premium__tags">
+                      {provider.services.slice(0, 3).map((service) => (
+                        <span key={service}>{service}</span>
                       ))}
                     </div>
 
-                    {provider.services.length > 3 && (
-                      <button
-                        type="button"
-                        className="home_featured_viewmore"
-                        onClick={() => toggleProvider(provider.id)}
-                      >
-                        {isExpanded ? "View less" : "View more"}
-                      </button>
-                    )}
+                    <Link
+                      href={`/provider/provider-00${provider.id}`}
+                      className="home-providers-premium__button"
+                    >
+                      View Profile
+                    </Link>
                   </div>
                 </article>
-              );
-            })}
-          </div>
-
-          <div className="home_featured_footer">
-            <a href="/providers" className="home_featured_more_btn">
-              View More Providers
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* HOW IT WORKS                                                     */}
-      {/* ================================================================ */}
-
-      <section className="home_how" aria-labelledby="how-it-works-title">
-        <div className="container home_how__inner">
-          <header className="home_section_header">
-            <h2 id="how-it-works-title" className="home_section_title">
-              How It Works
-            </h2>
-
-            <p className="home_section_sub">
-              Simple steps to find, book and track verified local pros.
-            </p>
-          </header>
-
-          <div className="home_how__grid" role="list">
-            <article
-              className="home_how__step"
-              role="listitem"
-              aria-labelledby="how-step-1"
-            >
-              <div className="home_how__icon" aria-hidden>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M3 12h18M3 6h12M3 18h10"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="home_how__body">
-                <h3 id="how-step-1" className="home_how__title">
-                  Search
-                </h3>
-
-                <p className="home_how__desc">
-                  Tell us what service you need — location, time and brief
-                  details.
-                </p>
-              </div>
-
-              <div className="home_how__badge" aria-hidden>
-                1
-              </div>
-            </article>
-
-            <article
-              className="home_how__step"
-              role="listitem"
-              aria-labelledby="how-step-2"
-            >
-              <div className="home_how__icon" aria-hidden>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 2l3 6 6 .9-4.5 4 .9 6L12 16.5 6.6 19.9 7.5 13 3 9l6-.9L12 2z"
-                    stroke="currentColor"
-                    strokeWidth="0.9"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="home_how__body">
-                <h3 id="how-step-2" className="home_how__title">
-                  Compare
-                </h3>
-
-                <p className="home_how__desc">
-                  View ratings, prices and availability — pick the best fit.
-                </p>
-              </div>
-
-              <div className="home_how__badge" aria-hidden>
-                2
-              </div>
-            </article>
-
-            <article
-              className="home_how__step"
-              role="listitem"
-              aria-labelledby="how-step-3"
-            >
-              <div className="home_how__icon" aria-hidden>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 2v6M21 12h-6M12 22v-6M3 12h6"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-
-              <div className="home_how__body">
-                <h3 id="how-step-3" className="home_how__title">
-                  Book &amp; Track
-                </h3>
-
-                <p className="home_how__desc">
-                  Confirm booking, pay securely and track your provider in real
-                  time.
-                </p>
-              </div>
-
-              <div className="home_how__badge" aria-hidden>
-                3
-              </div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* WHY CHOOSE US                                                    */}
-      {/* ================================================================ */}
-
-      <section className="home_why">
-        <div className="container">
-          <header className="home_section_header center">
-            <h2 className="home_section_title">Why Choose YourPlatformName</h2>
-
-            <p className="home_section_sub">
-              Built with trust, transparency, and technology at its core.
-            </p>
-          </header>
-
-          <div className="home_why__grid">
-            {[
-              "Identity-verified providers",
-              "Transparent pricing with no hidden fees",
-              "Real-time map tracking",
-              "In-app chat and secure payments",
-              "Dedicated dispute resolution support",
-            ].map((item, index) => (
-              <div key={index} className="home_why_card">
-                <div className="home_why_icon">✓</div>
-                <div className="home_why_text">{item}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* TESTIMONIALS                                                     */}
-      {/* ================================================================ */}
-
-      <section className="home_testimonials">
-        <div className="container home_testimonials__inner">
-          <header className="home_section_header center">
-            <h2 className="home_section_title">What Customers Are Saying</h2>
-
-            <p className="home_section_sub">
-              Real experiences from customers who use YourPlatformName daily.
-            </p>
-          </header>
-
-          <div className="home_testimonials__grid">
-            <article className="home_testimonial_card">
-              <div className="home_testimonial_user">
-                <img
-                  src="https://randomuser.me/api/portraits/women/44.jpg"
-                  alt="Sarah Johnson"
-                  className="home_testimonial_avatar"
-                />
-
-                <div>
-                  <h4 className="home_testimonial_name">Sarah Johnson</h4>
-
-                  <div className="home_testimonial_role">Home Owner</div>
-                </div>
-              </div>
-
-              <p className="home_testimonial_text">
-                “I needed an emergency plumber late at night and within 8
-                minutes I had three verified professionals to choose from. The
-                pricing was transparent, and I could track the provider live on
-                the map. The entire experience felt safe, modern, and extremely
-                convenient.”
-              </p>
-
-              <div className="home_testimonial_rating">★★★★★</div>
-            </article>
-
-            <article className="home_testimonial_card">
-              <div className="home_testimonial_user">
-                <img
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  alt="Daniel Ade"
-                  className="home_testimonial_avatar"
-                />
-
-                <div>
-                  <h4 className="home_testimonial_name">Daniel Ade</h4>
-
-                  <div className="home_testimonial_role">Business Owner</div>
-                </div>
-              </div>
-
-              <p className="home_testimonial_text">
-                “The real-time tracking feature completely changed how I book
-                services. I could see exactly when the technician would arrive,
-                chat with them directly in-app, and pay securely without
-                handling cash. This platform is setting a new standard for
-                service marketplaces.”
-              </p>
-
-              <div className="home_testimonial_rating">★★★★★</div>
-            </article>
-          </div>
-
-          <div className="home_testimonials_actions">
-            <a href="/reviews" className="home_testimonials_cta">
-              Read more reviews
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================ */}
-      {/* CALL TO ACTION                                                   */}
-      {/* ================================================================ */}
-
-      <section className="home_cta" aria-labelledby="cta-title">
-        <div className="container home_cta__inner">
-          <div className="home_cta__content">
-            <h2 id="cta-title" className="home_cta__headline">
-              Need a service today?
-            </h2>
-
-            <p className="home_cta__sub">
-              Book a verified professional in minutes — fast, secure, and
-              reliable.
-            </p>
-
-            <div
-              className="home_cta__actions"
-              role="region"
-              aria-label="Primary actions"
-            >
-              <Link
-                href="/search"
-                className="home_cta__btn home_cta__btn--primary"
-                aria-label="Find a Professional"
-              >
-                Find a Professional
-              </Link>
-
-              <Link
-                href="/provider/onboarding"
-                className="home_cta__btn home_cta__btn--secondary"
-                aria-label="Become a Provider"
-              >
-                Become a Provider
-              </Link>
+              ))}
             </div>
           </div>
+        </section>
 
-          <div className="home_cta__media" role="img" aria-hidden>
-            <img
-              src="https://images.unsplash.com/photo-1556761175-129418cb2dfe?w=1200&q=80&auto=format&fit=crop"
-              alt="Service professional illustration"
-              className="home_cta__image"
-            />
+        {/* ================================================================ */}
+        {/* HOW IT WORKS — PREMIUM PARALLAX */}
+        {/* ================================================================ */}
+
+        <section className="home_how" aria-labelledby="how-it-works-title">
+          <div className="home_how__backdrop" aria-hidden="true" />
+
+          <div className="home_how__overlay" aria-hidden="true" />
+
+          <div className="container home_how__inner">
+            <header className="home_how__header" data-home-reveal="fade-up">
+              <span className="home_how__eyebrow">Simple by design</span>
+
+              <h2 id="how-it-works-title">
+                Great service shouldn&apos;t be complicated.
+              </h2>
+
+              <p>
+                Find the right professional, compare your options, and stay
+                connected from booking to completion.
+              </p>
+            </header>
+
+            <div className="home_how__grid" role="list">
+              {/* STEP 01 */}
+              <article
+                className="home_how__step"
+                role="listitem"
+                data-home-reveal="fade-up"
+                style={{ transitionDelay: "0ms" }}
+              >
+                <div className="home_how__step-top">
+                  <span className="home_how__number">01</span>
+
+                  <span className="home_how__icon">
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        cx="11"
+                        cy="11"
+                        r="6.5"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                      />
+
+                      <path
+                        d="M16 16l4.5 4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
+
+                <div className="home_how__step-body">
+                  <span className="home_how__step-label">Discover</span>
+
+                  <h3>Search</h3>
+
+                  <p>
+                    Tell us what you need. Search for a service, explore
+                    categories, or describe the problem in your own words.
+                  </p>
+                </div>
+
+                <span className="home_how__step-line" />
+              </article>
+
+              {/* STEP 02 */}
+              <article
+                className="home_how__step"
+                role="listitem"
+                data-home-reveal="fade-up"
+                style={{ transitionDelay: "120ms" }}
+              >
+                <div className="home_how__step-top">
+                  <span className="home_how__number">02</span>
+
+                  <span className="home_how__icon">
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M4 6h16M4 12h10M4 18h7"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+
+                      <circle
+                        cx="18"
+                        cy="17"
+                        r="3"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                      />
+                    </svg>
+                  </span>
+                </div>
+
+                <div className="home_how__step-body">
+                  <span className="home_how__step-label">Decide</span>
+
+                  <h3>Compare</h3>
+
+                  <p>
+                    Compare ratings, pricing, verification, distance and
+                    availability before choosing the professional that fits.
+                  </p>
+                </div>
+
+                <span className="home_how__step-line" />
+              </article>
+
+              {/* STEP 03 */}
+              <article
+                className="home_how__step"
+                role="listitem"
+                data-home-reveal="fade-up"
+                style={{ transitionDelay: "240ms" }}
+              >
+                <div className="home_how__step-top">
+                  <span className="home_how__number">03</span>
+
+                  <span className="home_how__icon">
+                    <svg
+                      width="26"
+                      height="26"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 3v4"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+
+                      <path
+                        d="M5.6 6.3l2.8 2"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+
+                      <path
+                        d="M18.4 6.3l-2.8 2"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+
+                      <circle
+                        cx="12"
+                        cy="13"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                      />
+
+                      <path
+                        d="M12 10v3l2 1"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </span>
+                </div>
+
+                <div className="home_how__step-body">
+                  <span className="home_how__step-label">Complete</span>
+
+                  <h3>Book &amp; Track</h3>
+
+                  <p>
+                    Confirm your booking, pay securely and, where applicable,
+                    follow your provider&apos;s journey in real time.
+                  </p>
+                </div>
+
+                <span className="home_how__step-line" />
+              </article>
+            </div>
+
+            <div className="home_how__footer" data-home-reveal="fade-up">
+              <span className="home_how__footer-dot" />
+
+              <span>
+                From discovery to completion, everything stays connected.
+              </span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        {/* ================================================================ */}
+        {/* WHY CHOOSE US */}
+        {/* ================================================================ */}
 
-      {/* ================================================================ */}
-      {/* DOWNLOAD APP SECTION                                             */}
-      {/* ================================================================ */}
+        <section
+          className="home-benefits-premium"
+          aria-labelledby="home-benefits-title"
+        >
+          <div className="container home-benefits-premium__container">
+            <div
+              className="home-benefits-premium__copy"
+              data-home-reveal="fade-left"
+            >
+              <span className="home-benefits-premium__eyebrow">
+                Why people choose us
+              </span>
 
-      <section
-        className="home_download home_download--border-only"
-        aria-labelledby="download-title"
-      >
-        <div className="container home_download__inner">
-          <header className="home_section_header center">
-            <h2 id="download-title" className="home_section_title">
-              Get the App
-            </h2>
+              <h2 id="home-benefits-title">The confidence to book.</h2>
 
-            <p className="home_section_sub">
-              Book services faster, track providers in real time, and manage
-              everything from your phone.
-            </p>
-          </header>
+              <p>
+                A modern service marketplace should do more than show you a list
+                of names. It should help you make a good decision.
+              </p>
 
-          <div className="home_download__badges">
-            <a href="#" className="home_download__badge">
-              <img src="/app-store-badge.png" alt="Download on the App Store" />
-            </a>
+              <Link href="/safety" className="home-benefits-premium__link">
+                Learn about safety & trust →
+              </Link>
+            </div>
 
-            <a href="#" className="home_download__badge">
-              <img src="/google-play-badge.png" alt="Get it on Google Play" />
-            </a>
+            <div className="home-benefits-premium__list">
+              {[
+                "Identity-verified providers",
+                "Transparent pricing",
+                "Location-aware discovery",
+                "Secure payment experience",
+                "Real-time booking updates",
+                "Support and dispute resolution",
+              ].map((item, index) => (
+                <div
+                  key={item}
+                  className="home-benefits-premium__item"
+                  data-home-reveal="fade-right"
+                  style={{
+                    transitionDelay: `${index * 70}ms`,
+                  }}
+                >
+                  <span className="home-benefits-premium__check">✓</span>
+
+                  <span>{item}</span>
+
+                  <span className="home-benefits-premium__item-arrow">→</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <SiteFooter />
-    </main>
+        {/* ================================================================ */}
+        {/* TESTIMONIALS */}
+        {/* ================================================================ */}
+
+        <section
+          className="home-reviews-premium"
+          aria-labelledby="home-reviews-title"
+        >
+          <div className="container home-reviews-premium__container">
+            <div
+              className="home-reviews-premium__heading"
+              data-home-reveal="fade-up"
+            >
+              <span className="home-reviews-premium__eyebrow">
+                Customer experiences
+              </span>
+
+              <h2 id="home-reviews-title">
+                Good service leaves an impression.
+              </h2>
+
+              <p>
+                Hear from people who used the platform to find professionals
+                they could trust.
+              </p>
+            </div>
+
+            <div className="home-reviews-premium__grid">
+              {[
+                {
+                  name: "Sarah Johnson",
+                  role: "Home Owner",
+                  image: "https://randomuser.me/api/portraits/women/44.jpg",
+                  text: "I needed an emergency plumber late at night and found several verified professionals almost immediately. The live tracking made the entire experience feel incredibly safe.",
+                },
+                {
+                  name: "Daniel Ade",
+                  role: "Business Owner",
+                  image: "https://randomuser.me/api/portraits/men/32.jpg",
+                  text: "Being able to compare providers before booking changed everything. I could see ratings, availability and location instead of simply choosing a random number online.",
+                },
+              ].map((review, index) => (
+                <article
+                  key={review.name}
+                  className="home-reviews-premium__card"
+                  data-home-reveal="fade-up"
+                  style={{
+                    transitionDelay: `${index * 120}ms`,
+                  }}
+                >
+                  <div className="home-reviews-premium__quote">“</div>
+
+                  <p>{review.text}</p>
+
+                  <div className="home-reviews-premium__user">
+                    <img src={review.image} alt={review.name} />
+
+                    <div>
+                      <strong>{review.name}</strong>
+                      <span>{review.role}</span>
+                    </div>
+
+                    <div className="home-reviews-premium__stars">★★★★★</div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================ */}
+        {/* FINAL CTA */}
+        {/* ================================================================ */}
+
+        <section
+          className="home-final-cta"
+          aria-labelledby="home-final-cta-title"
+        >
+          <div className="home-final-cta__glow" />
+
+          <div className="container home-final-cta__container">
+            <div className="home-final-cta__content" data-home-reveal="fade-up">
+              <span className="home-final-cta__eyebrow">
+                Your next service starts here
+              </span>
+
+              <h2 id="home-final-cta-title">Find someone you can trust.</h2>
+
+              <p>
+                Search thousands of local professionals, compare your options
+                and book with confidence.
+              </p>
+
+              <div className="home-final-cta__actions">
+                <Link href="/search" className="home-final-cta__primary">
+                  Find a Professional
+                </Link>
+
+                <Link href="/provider" className="home-final-cta__secondary">
+                  Become a Provider
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================ */}
+        {/* GET THE APP */}
+        {/* ================================================================ */}
+
+        <section className="home-app-premium" aria-labelledby="home-app-title">
+          <div className="container home-app-premium__container">
+            <div
+              className="home-app-premium__copy"
+              data-home-reveal="fade-left"
+            >
+              <span className="home-app-premium__eyebrow">
+                Take it with you
+              </span>
+
+              <h2 id="home-app-title">Your services, wherever you are.</h2>
+
+              <p>
+                Discover providers, manage bookings, chat and track active jobs
+                from your phone.
+              </p>
+
+              <div className="home-app-premium__badges">
+                <a href="#" aria-label="Download on the App Store">
+                  <img
+                    src="/app-store-badge.png"
+                    alt="Download on the App Store"
+                  />
+                </a>
+
+                <a href="#" aria-label="Get it on Google Play">
+                  <img
+                    src="/google-play-badge.png"
+                    alt="Get it on Google Play"
+                  />
+                </a>
+              </div>
+            </div>
+
+            <div className="home-app-premium__visual" data-home-reveal="zoom">
+              <div className="home-app-premium__phone">
+                <div className="home-app-premium__phone-top">
+                  <span>10:24</span>
+                  <span>● ● ●</span>
+                </div>
+
+                <div className="home-app-premium__phone-card">
+                  <span>Live booking</span>
+                  <strong>Plumber on the way</strong>
+                  <small>8 minutes away</small>
+                </div>
+
+                <div className="home-app-premium__phone-map">
+                  <span className="home-app-premium__phone-route" />
+                  <span className="home-app-premium__phone-user" />
+                  <span className="home-app-premium__phone-provider">✓</span>
+                </div>
+
+                <div className="home-app-premium__phone-bottom">
+                  <span>Message</span>
+                  <strong>Track provider</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <SiteFooter />
+      </main>
+    </div>
   );
 }

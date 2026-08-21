@@ -10,6 +10,16 @@ export default function ServiceSearch() {
 
   const router = useRouter();
 
+  const createServiceSlug = (name) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+  };
+
   const handleSearch = (value) => {
     setQuery(value);
 
@@ -34,7 +44,9 @@ export default function ServiceSearch() {
   };
 
   const selectService = (service) => {
-    router.push(`/services/${service.id}`);
+    const serviceSlug = createServiceSlug(service.name);
+
+    router.push(`/services/${serviceSlug}`);
   };
 
   return (

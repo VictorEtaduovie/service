@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -60,6 +60,33 @@ export default function HowItWorksPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [providerActive, setProviderActive] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const elements = revealRef.current?.querySelectorAll("[data-how-reveal]");
+
+    if (!elements) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("how-reveal-visible");
+
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -50px 0px",
+      },
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     setIsVisible(true);
@@ -75,7 +102,7 @@ export default function HowItWorksPage() {
     <div className="how-it-works-page">
       <Navbar />
 
-      <main className="how-it-works-page__main">
+      <main ref={revealRef} className="how-it-works-page__main">
         {/* ===================================================== */}
         {/* HERO */}
         {/* ===================================================== */}
@@ -206,7 +233,7 @@ export default function HowItWorksPage() {
 
         <section id="journey" className="how-it-works-page__journey">
           <div className="how-it-works-page__container">
-            <div className="how-it-works-page__section-heading">
+            <div className="how-it-works-page__section-heading" data-how-reveal>
               <span className="how-it-works-page__section-kicker">
                 Your journey
               </span>
@@ -232,6 +259,10 @@ export default function HowItWorksPage() {
                         ? "how-it-works-page__journey-nav--active"
                         : ""
                     }`}
+                    data-how-reveal
+                    style={{
+                      transitionDelay: `${index * 90}ms`,
+                    }}
                     onClick={() => setActiveStep(index)}
                   >
                     <span>{step.number}</span>
@@ -246,7 +277,10 @@ export default function HowItWorksPage() {
                 ))}
               </div>
 
-              <div className="how-it-works-page__journey-visual">
+              <div
+                className="how-it-works-page__journey-visual"
+                data-how-reveal="right"
+              >
                 <div className="how-it-works-page__journey-progress">
                   <span
                     style={{
@@ -410,7 +444,10 @@ export default function HowItWorksPage() {
               </div>
 
               <div className="how-it-works-page__trust-cards">
-                <div className="how-it-works-page__trust-card">
+                <div
+                  className="how-it-works-page__trust-card"
+                  data-how-reveal="right"
+                >
                   <span>✓</span>
                   <div>
                     <strong>Identity verification</strong>
@@ -515,7 +552,7 @@ export default function HowItWorksPage() {
           <div className="how-it-works-page__cta-glow" />
 
           <div className="how-it-works-page__container">
-            <div className="how-it-works-page__cta-content">
+            <div className="how-it-works-page__cta-content" data-how-reveal>
               <span className="how-it-works-page__section-kicker">
                 Ready when you are
               </span>
