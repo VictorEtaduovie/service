@@ -24,14 +24,33 @@ function CompleteProfileForm() {
 
     setIsSubmitting(true);
 
-    // Temporary testing data
+    /*
+     * TEMPORARY FRONTEND TESTING DATA
+     *
+     * Later, this will be replaced with a real API/database
+     * request that creates or updates the client account.
+     */
     localStorage.setItem("client_logged_in", "true");
     localStorage.setItem("client_email", email);
     localStorage.setItem("client_name", fullName.trim());
     localStorage.setItem("client_phone", phone.trim());
+    localStorage.setItem("client_location", location.trim());
 
+    /*
+     * Keep the provider ID available for the booking flow.
+     * The dashboard can later use this to resume the selected
+     * provider/service booking.
+     */
+    if (providerId) {
+      localStorage.setItem("pending_provider_id", providerId);
+    }
+
+    /*
+     * After completing the profile, take the client
+     * directly to the client dashboard.
+     */
     setTimeout(() => {
-      router.push(`/book/${providerId}`);
+      router.push("/client/dashboard");
     }, 600);
   };
 
@@ -48,7 +67,7 @@ function CompleteProfileForm() {
 
             <h1>Complete your profile</h1>
 
-            <p>Just a few details and you can continue with your booking.</p>
+            <p>Just a few details and your client account will be ready.</p>
           </div>
 
           <div className="client-complete-profile__card">
@@ -69,6 +88,7 @@ function CompleteProfileForm() {
               className="client-complete-profile__form"
               onSubmit={handleSubmit}
             >
+              {/* EMAIL */}
               <div className="client-complete-profile__field">
                 <label htmlFor="client-profile-email">Email address</label>
 
@@ -83,6 +103,7 @@ function CompleteProfileForm() {
                 <small>Your verified email address</small>
               </div>
 
+              {/* FULL NAME */}
               <div className="client-complete-profile__field">
                 <label htmlFor="client-profile-name">Full name</label>
 
@@ -97,6 +118,7 @@ function CompleteProfileForm() {
                 />
               </div>
 
+              {/* PHONE */}
               <div className="client-complete-profile__field">
                 <label htmlFor="client-profile-phone">Phone number</label>
 
@@ -120,6 +142,7 @@ function CompleteProfileForm() {
                 </div>
               </div>
 
+              {/* LOCATION */}
               <div className="client-complete-profile__field">
                 <label htmlFor="client-profile-location">Location</label>
 
@@ -132,9 +155,10 @@ function CompleteProfileForm() {
                   autoComplete="address-level2"
                 />
 
-                <small>This helps us show relevant local providers.</small>
+                <small>This helps us show relevant local professionals.</small>
               </div>
 
+              {/* SUBMIT */}
               <button
                 type="submit"
                 className="client-complete-profile__submit"
@@ -142,13 +166,13 @@ function CompleteProfileForm() {
               >
                 {isSubmitting
                   ? "Saving your profile..."
-                  : "Continue to Booking"}
+                  : "Continue to Dashboard"}
               </button>
             </form>
 
             <p className="client-complete-profile__privacy">
               Your information is used to create your client profile and
-              complete your booking securely.
+              securely personalize your experience.
             </p>
           </div>
         </div>
@@ -169,7 +193,14 @@ export default function CompleteProfilePage() {
           <main className="client-complete-profile__main">
             <div className="client-complete-profile__container">
               <div className="client-complete-profile__card">
-                <p style={{ margin: 0, textAlign: "center" }}>Loading...</p>
+                <p
+                  style={{
+                    margin: 0,
+                    textAlign: "center",
+                  }}
+                >
+                  Loading...
+                </p>
               </div>
             </div>
           </main>
